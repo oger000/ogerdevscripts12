@@ -1,0 +1,10 @@
+<?PHP
+
+$webDir = "../web";
+$webToDevDir = "../devscripts12";
+
+$dbDefAliasId = "default";
+$dbStructFileName = "dbstruct/dbStruct.inc.php";
+$dbStructDumpName = "dbstruct/dbStruct.sql";
+
+?>
