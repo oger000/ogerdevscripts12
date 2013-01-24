@@ -45,7 +45,7 @@ else {
 
 $structChecker->forceDbStruct($strucTpl);
 
-if ($structChecker->updateCounter) {
+if ($structChecker->changeCounter) {
   echo "\n";
   if ($params["apply"]) {
     echo "Write structure file.\n";
