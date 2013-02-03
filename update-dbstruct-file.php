@@ -16,11 +16,11 @@ set_exception_handler(null);
 Config::init();
 Db::openDbAliasId($dbDefAliasId);
 
-$structChecker = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]["dbName"]);
-$dbStruct = $structChecker->getDbStruct();
+$structer = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]["dbName"]);
+$dbStruct = $structer->getDbStruct();
 
-$structChecker->setParams(array("dry-run" => true,
-                                "log-level" => $structChecker::LOG_NOTICE,
+$structer->setParams(array("dry-run" => true,
+                                "log-level" => $structer::LOG_NOTICE,
                                 "echo-log" => true));
 
 $strucTpl = array();
@@ -40,16 +40,16 @@ if ($params["reverse"]) {
 else {
   echo "*** Following must be changed in the struct file to be in sync with the database:\n";
   // ATTENTION: the normal mode for this script is the reverse mode for the struct checker !!!
-  $structChecker->startReverseMode($strucTpl);
+  $structer->startReverseMode($strucTpl);
 }
 
-$structChecker->forceDbStruct($strucTpl);
+$structer->forceDbStruct($strucTpl);
 
-if ($structChecker->changeCounter) {
+if ($structer->changeCount) {
   echo "\n";
   if ($params["apply"]) {
     echo "Write structure file.\n";
-    file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structChecker->formatDbStruct($dbStruct) . "\n;\n?>\n");
+    file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
     $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]["user"] .
            " " . Config::$dbDefs[$dbDefAliasId]["pass"] .
            " " . Config::$dbDefs[$dbDefAliasId]["dbName"] .
