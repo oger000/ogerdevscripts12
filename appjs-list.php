@@ -1,6 +1,9 @@
 #!/usr/bin/php
 <?PHP
 
+error_reporting((E_ALL | E_STRICT));
+error_reporting(error_reporting() ^ E_NOTICE);
+
 
 require_once("global.inc.php");
 require_once("config.localonly.inc.php");
@@ -34,73 +37,29 @@ echo "Sorting dependencies\n";
 $classes = sortDeps($classes, $appJsName, $appJsMain);
 
 
-$classList = '';
+$files = array();
 foreach ($classes as $className => $content) {
-  $fileName = $appJsRoot . $className;
-  $fileBase = basename($fileName);
-  $dirName = dirname($fileName) . DIRECTORY_SEPARATOR;
-  $filesText .= "$indent{ \"path\": \"$dirName\",\n$indent  \"name\": \"$fileBase\",\n$indent},\n";
-  echo "$searchDir$fileNameBare\n";
+  $files[className] = $appJsRoot .
+                      str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appName))) . ".js";
 }
 
-  echo "Create $jsbFile\n";
-  if ($applyFlag) {
-    $oldText = file_get_contents($jsbTmpl);
-    $newText = preg_replace('/#FILES#/', $filesText, $oldText);
-    $result = file_put_contents($jsbFile, $newText);
-    if ($result === false) {
-      echo "    *** Error writing new text to $jsbFile. ***\n";
-    }
+
+// update index appjs include
+echo "Write index appjs include file $indexIncludeJs\n";
+if ($params['apply']) {
+  $text = "";
+  foreach ($files as $fileName) {
+    $text .= "$fileName\n";
   }
-  else {
-    echo "  - Check-only. Jsb file not created.\n";
-  }
-  echo "\n";
-
-
-  // update index file
-  echo "Update indexfile $indexFile\n";
-  if ($applyFlag) {
-    $indent = "  ";
-    $scriptTpl = "<script type=\"text/javascript\" src=\"js/app#JSFILE#\"></script>\n";
-    $newText = "";
-    foreach ($files as $fileNameBare => $content) {
-      $newText .= $indent . str_replace('#JSFILE#', $fileNameBare, $scriptTpl);
-    }
-
-    $oldText = file_get_contents($indexFile);
-    $search = "|" . preg_quote("<!-- #APPJS BEGIN -->") . ".*?" . preg_quote("<!-- #APPJS END -->") . "|ms";
-    //$search = "|<!-- #APPJS BEGIN -->.*?<!-- #APPJS END -->|ms";
-    $repl = "<!-- #APPJS BEGIN -->\n$newText<!-- #APPJS END -->";
-    $newText = preg_replace($search, $repl, $oldText);
-    $result = file_put_contents($indexFile, $newText);
-    if ($result === false) {
-      echo "    *** Error writing new text to $indexFile. ***\n";
-    }
-  }
-  else {
-    echo "  - Check-only. Changes NOT applied to the index file.\n";
-  }
-  echo "\n";
-
-}  // eo create command
+  file_put_contents($indexIncJsFile, $text);
+}
+else {
+  echo "  - Check-only. Do not apply.\n";
+}
+echo "\n";
 
 
 
-#####################################
-# process build command
-#####################################
-
-if ($buildFlag) {
-  if ($applyFlag) {
-    system("$jsbuildCmd -p $jsbFile -d $buildDir -v > $logFile 2>&1");
-    system("cat $logFile");
-  }
-  else {
-    echo "  - Build without apply not possible.\n";
-  }
-  echo "\n";
-}  // eo build command
 
 
 
@@ -111,7 +70,7 @@ if ($buildFlag) {
 /*
 * Get app classes from fileregex
 */
-function getAppClasses($dirName, $regex, $appName, $appMain, $startDir == null) {
+function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 
   // if startdir is not given, then use current dirname
   if ($startDir === null) {
