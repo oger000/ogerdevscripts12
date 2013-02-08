@@ -15,17 +15,10 @@ include('ext4aliases.inc.php');
 
 // application init
 chdir(__DIR__ . "/$webRoot");
-echo "CWD=" . getcwd() . "\n\n";
+echo "\nCWD=" . getcwd() . "\n\n";
 
 
 #####################################
-# settings
-#####################################
-
-$appJsMain = "app.js";
-$indexFile = "index.php";
-
-
 
 
 echo "Read files from $searchDir\n";
@@ -34,27 +27,37 @@ $classes = getAppClasses($appJsRoot, $fileRegex, $appJsName, $appJsMain);
 ksort($classes);
 
 echo "Sorting dependencies\n";
-$classes = sortDeps($classes, $appJsName, $appJsMain);
+$classesNew = sortDeps($classes, $appJsName, $appJsMain);
 
 
-$files = array();
-foreach ($classes as $className => $content) {
-  $files[className] = $appJsRoot .
-                      str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appName))) . ".js";
+$out = "";
+foreach ($classesNew as $className => $dummy) {
+  $out .= $appJsRoot .
+           str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appJsName))) . ".js\n";
 }
+
+if (count($classesNew) < count($classes) && $params['partial'] == "add") {
+  echo "\nAdd " . count($classes) - count($classesNew) . " unresolved classes.\n";
+  $out .= "\n";
+  foreach ($classes as $className => $dummy) {
+    if (!$classesNew[$className]) {
+      $out .= $appJsRoot .
+               str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appJsName))) . ".js\n";
+    }
+  }
+}  // add unresolved
 
 
 // update index appjs include
-echo "Write index appjs include file $indexIncludeJs\n";
+echo "\n";
 if ($params['apply']) {
-  $text = "";
-  foreach ($files as $fileName) {
-    $text .= "$fileName\n";
+  echo "Write appjs file list $appJsList.\n";
+  if (file_put_contents($appJsList, $out) === false) {
+    echo "ERROR on write to $appJsList.\n";
   }
-  file_put_contents($indexIncJsFile, $text);
 }
 else {
-  echo "  - Check-only. Do not apply.\n";
+  echo "  - Check-only. Do not write file list.\n";
 }
 echo "\n";
 
@@ -83,6 +86,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
   $dh = opendir($dirName);
   if ($dh === false) {
     echo "   *** Cannot open directory $dirName.\n";
+    exit;
   }
 
   while (($fileName = readdir($dh)) !== false) {
@@ -111,7 +115,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
     // check if file contains class name
     $content = file_get_contents($searchFileName);
 
-    // exclude app main js
+    // exclude app main js, because this has no class name
     if ($shortFileName != DIRECTORY_SEPARATOR . $appMain) {
       // TODO this is very dumb, should be refined
       if (!preg_match('|' . preg_quote($className) . '|', $content)) {
@@ -141,6 +145,7 @@ function sortDeps($classes, $appName, $appJs) {
 
   global $debug;
   global $extAliases;
+  global $params;
 
   $deps = array();
   $xtypeDeps = array();
@@ -153,7 +158,7 @@ function sortDeps($classes, $appName, $appJs) {
   // Ext.require method and the "requires" property
   // and implicit dependencies (all other)?
 
-  // search all files for dependencies infos
+  // collect dependencies of all classes
   foreach ($classes as $className => $content) {
 
     $deps[$className] = array();   // force each class to the deps array
@@ -215,7 +220,7 @@ function sortDeps($classes, $appName, $appJs) {
   }  // collect deps
 
 
-  // resolve xtype dependencies to classnames
+  // map xtype dependencies to classnames
   foreach ($xtypeDeps as $className => $xtypeDep) {
     foreach ($xtypeDep as $xtype) {
       // we need not handle aliases already defined in ext
@@ -235,7 +240,7 @@ function sortDeps($classes, $appName, $appJs) {
   }
 
 
-  // resolve store dependencies by storeId to classnames
+  // map store dependencies by storeId to classnames
   foreach ($storeIdDeps as $className => $storeDep) {
     foreach ($storeDep as $storeId) {
       $depClass = $storeIdDefs[$storeId];
@@ -250,9 +255,33 @@ function sortDeps($classes, $appName, $appJs) {
     }
   }
 
+  // check for missing class dependencies
+  $missing = array();
+  foreach ($deps as $className => $classDeps) {
+    foreach ($classDeps as $depName) {
+      if (!$deps[$depName]) {
+        echo "* $className depends on $depName which does not exist.\n";
+        $missing[$depName] = $depName;
+        if ($params['missing'] == "del") {
+          unset($deps[$className][$depName]);
+          echo "  - Remove dependency.\n";
+        }
+      }
+    }
+  }  // eo missing check
+  if (count($missing)) {
+    switch ($params['missing']) {
+    case "del":
+      // nothing to do here - already removed
+      break;
+    default:  // abort
+      echo "\nAbort.\n\n";
+      exit;
+    }
+  }  // eo missing
+
   // order by pushing those classes to the stack that have no dependences
   // or where the dependencies are already on the stack (resolved)
-  // and remove the pushed class from all remaining classes from the (open) dependency array
   $classesNew = array();
   while (count($deps)) {
 
@@ -280,7 +309,8 @@ function sortDeps($classes, $appName, $appJs) {
     }  // eo one dep loop
 
     if ($resolvedCount == 0) {
-      // maybe sort by dep count?
+      // maybe sort by dep count of a class or by
+      // count of references TO a class?
       echo "Warning: Unresolved dependencies.\n";
       foreach ($deps as $className => $classDeps) {
         echo " - $className (" . count($classDeps) . ")\n";
@@ -293,7 +323,15 @@ function sortDeps($classes, $appName, $appJs) {
         }
       }
       echo "\n";
-      exit;
+
+      switch ($params['partial']) {
+      case "ok":
+      case "add":
+        return $classesNew;
+        break;
+      default:  // abort
+        exit;
+      }
     }
 
   }  // eo while deps (files)

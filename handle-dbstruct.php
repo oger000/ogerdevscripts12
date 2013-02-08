@@ -1,6 +1,9 @@
 #!/usr/bin/php
 <?PHP
 
+error_reporting((E_ALL | E_STRICT));
+error_reporting(error_reporting() ^ E_NOTICE);
+
 
 require_once("global.inc.php");
 require_once("config.localonly.inc.php");
@@ -8,7 +11,7 @@ $params = getParams();
 
 // application init
 chdir(__DIR__ . "/$webRoot");
-echo "CWD=" . getcwd() . "\n\n";
+echo "\nCWD=" . getcwd() . "\n\n";
 $skipLogonCheck = true;
 require_once("php/init.inc.php");
 set_exception_handler(null);
@@ -21,8 +24,8 @@ $structer = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]['dbN
 $dbStruct = $structer->getDbStruct();
 
 $structer->setParams(array("dry-run" => true,
-                                "log-level" => $structer::LOG_NOTICE,
-                                "echo-log" => true));
+                            "log-level" => $structer::LOG_NOTICE,
+                            "echo-log" => true));
 
 $strucTpl = array();
 if (file_exists($dbStructFileName)) {
@@ -49,14 +52,25 @@ $structer->forceDbStruct($strucTpl);
 if ($structer->changeCount) {
   echo "\n";
   if ($params['apply']) {
-    echo "Write structure file.\n";
-    file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
-    $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]['user'] .
-           " " . Config::$dbDefs[$dbDefAliasId]['pass'] .
-           " " . Config::$dbDefs[$dbDefAliasId]['dbName'] .
-           " --no-data > $dbStructDumpName";
-    echo "Dump database structure ($cmd).\n";
-    passthru($cmd);
+    if ($params['reverse']) {  // structfile -> db
+      $structer2 = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]['dbName']);
+      $structer->setParams(array("dry-run" => false,
+                                  "log-level" => $structer::LOG_NOTICE,
+                                  "echo-log" => true));
+      $structer2->setParams(array());
+      $structer2->updateDbStruct($strucTpl);
+      $structer2->reorderDbStruct($strucTpl);
+    }
+    else {  // db -> structfile
+      echo "Write structure file.\n";
+      file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
+      $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]['user'] .
+             " " . Config::$dbDefs[$dbDefAliasId]['pass'] .
+             " " . Config::$dbDefs[$dbDefAliasId]['dbName'] .
+             " --no-data > $dbStructDumpName";
+      echo "Dump database structure ($cmd).\n";
+      passthru($cmd);
+    }
   }
   else {
     echo "Dry-run. Nothing changed.\n";
@@ -88,7 +102,7 @@ if ($params['apply'] && !$params['reverse']) {
     }
     $fieldList = "";
     foreach ($table['COLUMNS'] as $column) {
-      $fieldList .= ($fieldList ? ", " : "") . $column['COLUMN_NAME'];
+      $fieldList .= ($fieldList ? ", " : "") . "'" . $column['COLUMN_NAME'] . "'";
     }
     $marker = "// ###:";
     $replace = "$marker [ $fieldList ],";

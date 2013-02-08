@@ -3,11 +3,8 @@
 
 function getParams() {
   global $argv;
-  while (count($argv) > 0 && $argv[0] !== "--") {
-    array_shift($argv);
-  }
-  array_shift($argv);
 
+  // collect all params (including params for php itself)
   $params = array();
   while (count($argv) > 0) {
     $param = array_shift($argv);
@@ -24,7 +21,25 @@ function getParams() {
         $value = explode(",", $value);
       }
     }
+
+    if ($key == "--") {
+      $phpParams = true;
+      $value = $key;
+    }
+
     $params[$key] = $value;
+
+  }
+
+  // if php params are present remove them from array
+  // otherwise asume all params for this script
+  if ($phpParams) {
+    foreach ($params as $key => $value) {
+      unset($params[$key]);
+      if ($key == "--") {
+        break;
+      }
+    }
   }
 
   return $params;

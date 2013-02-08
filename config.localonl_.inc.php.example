@@ -1,10 +1,17 @@
 <?PHP
 
-$webDir = "../web";
-$webToDevDir = "../devscripts12";
+// all other directiries are relative to webRoot
+$webRoot = "../web";
 
 $dbDefAliasId = "default";
 $dbStructFileName = "dbstruct/dbStruct.inc.php";
 $dbStructDumpName = "dbstruct/dbStruct.sql";
+
+
+$appJsRoot = "js/app";
+$appJsName = "App";
+$appJsMain = "app.js";
+$appJsList = "index.appjslist.inc.php";
+
 
 ?>
