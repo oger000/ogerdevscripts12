@@ -64,8 +64,10 @@ if ($structer->changeCount) {
     else {  // db -> structfile
       echo "Write structure file.\n";
       file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
+      $pass = Config::$dbDefs[$dbDefAliasId]['pass'];
+      $pass = ($pass ? "-p$pass" : "");
       $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]['user'] .
-             " " . Config::$dbDefs[$dbDefAliasId]['pass'] .
+             " $pass" .
              " " . Config::$dbDefs[$dbDefAliasId]['dbName'] .
              " --no-data > $dbStructDumpName";
       echo "Dump database structure ($cmd).\n";
