@@ -262,7 +262,7 @@ function sortDeps($classes, $appName, $appJs) {
       if (!$deps[$depName]) {
         echo "* $className depends on $depName which does not exist.\n";
         $missing[$depName] = $depName;
-        if ($params['missing'] == "del") {
+        if ($params['missingdep'] == "cont") {
           unset($deps[$className][$depName]);
           echo "  - Remove dependency.\n";
         }
@@ -270,8 +270,8 @@ function sortDeps($classes, $appName, $appJs) {
     }
   }  // eo missing check
   if (count($missing)) {
-    switch ($params['missing']) {
-    case "del":
+    switch ($params['missingdep']) {
+    case "cont":
       // nothing to do here - already removed
       break;
     default:  // abort
@@ -309,8 +309,8 @@ function sortDeps($classes, $appName, $appJs) {
     }  // eo one dep loop
 
     if ($resolvedCount == 0) {
-      // maybe sort by dep count of a class or by
-      // count of references TO a class?
+      // - sort by dep count of a class or by
+      //   count of references TO a class?
       echo "Warning: Unresolved dependencies.\n";
       foreach ($deps as $className => $classDeps) {
         echo " - $className (" . count($classDeps) . ")\n";
@@ -320,6 +320,20 @@ function sortDeps($classes, $appName, $appJs) {
             echo " (not found)";
           }
           echo "\n";
+        }
+      }
+      echo "\n";
+
+      // - circular check (direct backpointer at least)
+      foreach ($deps as $className => $classDeps) {
+        foreach ($classDeps as $depName) {
+          foreach ($deps[$depName] as $otherDeps) {
+            foreach ($otherDeps as $otherDep) {
+              if ($otherDep == $className) {
+                echo "* Curcular dependency $className <-> $backDep\n";
+              }
+            }
+          }
         }
       }
       echo "\n";
