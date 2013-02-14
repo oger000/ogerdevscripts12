@@ -158,7 +158,7 @@ function sortDeps($classes, $appName, $appJs) {
   // Ext.require method and the "requires" property
   // and implicit dependencies (all other)?
 
-  // collect dependencies of all classes
+  // collect dependencies on other classes, xtypes and store ids for all classes
   foreach ($classes as $className => $content) {
 
     $deps[$className] = array();   // force each class to the deps array
@@ -259,7 +259,7 @@ function sortDeps($classes, $appName, $appJs) {
   $missing = array();
   foreach ($deps as $className => $classDeps) {
     foreach ($classDeps as $depName) {
-      if (!$deps[$depName]) {
+      if (!isset($deps[$depName])) {
         echo "* $className depends on $depName which does not exist.\n";
         $missing[$depName] = $depName;
         if ($params['missingdep'] == "cont") {
