@@ -11,7 +11,7 @@ $dbStructDumpName = "dbstruct/dbStruct.sql";
 $appJsRoot = "js/app";
 $appJsName = "App";
 $appJsMain = "app.js";
-$appJsList = "index.appjslist.inc.php";
+$appJsList = "appjslist.inc.php";
 
 
 ?>
