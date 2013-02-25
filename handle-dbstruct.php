@@ -18,9 +18,28 @@ set_exception_handler(null);
 
 
 Config::init();
-Db::openDbAliasId($dbDefAliasId);
+if (in_array("openDbAliasId", get_class_methods("Db"))) {
+  Db::openDbAliasId($dbDefAliasId);
+  $conn = Db::$conn;
+  $dbName = Config::$dbDefs[$dbDefAliasId]['dbName'];
+}
+else {  // fallback to pre12
+  $dbDef = Config::$dbDefs[$dbDefAliasId];
+  Db::init($dbDef['dbName'], $dbDef['dbUser'], $dbDef['dbPass'], $dbDef['dbAttributes']);
+  $conn = Db::getConn();
 
-$structer = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]['dbName']);
+  list($dbDriver, $driverSpecificPart) = explode(':', $dbDef['dbName'], 2);
+  $tmpParts = explode(';', $driverSpecificPart);
+  $dsnParts = array();
+  foreach ($tmpParts as $tmpPart) {
+    list($key, $value) = explode("=", $tmpPart, 2);
+    $dsnParts[$key] = $value;
+  }
+  $dbName = $dsnParts['dbname'];
+}
+
+
+$structer = new OgerDbStructMysql($conn, $dbName);
 $dbStruct = $structer->getDbStruct();
 
 $structer->setParams(array("dry-run" => true,
@@ -34,7 +53,7 @@ if (file_exists($dbStructFileName)) {
 
 
 echo "\n***************************************************\n";
-echo "* Database: " . Config::$dbDefs[$dbDefAliasId]['dbName'] . "\n";
+echo "* Database: " . $dbName . "\n";
 echo "* Struct file: dbStructFileName\n";
 echo "***************************************************\n";
 
@@ -53,7 +72,7 @@ if ($structer->changeCount) {
   echo "\n";
   if ($params['apply']) {
     if ($params['reverse']) {  // structfile -> db
-      $structer2 = new OgerDbStructMysql(Db::$conn, Config::$dbDefs[$dbDefAliasId]['dbName']);
+      $structer2 = new OgerDbStructMysql($conn, $dbName);
       $structer->setParams(array("dry-run" => false,
                                   "log-level" => $structer::LOG_NOTICE,
                                   "echo-log" => true));
@@ -68,7 +87,7 @@ if ($structer->changeCount) {
       $pass = ($pass ? "-p$pass" : "");
       $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]['user'] .
              " $pass" .
-             " " . Config::$dbDefs[$dbDefAliasId]['dbName'] .
+             " " . $dbName .
              " --no-data > $dbStructDumpName";
       echo "Dump database structure ($cmd).\n";
       passthru($cmd);
