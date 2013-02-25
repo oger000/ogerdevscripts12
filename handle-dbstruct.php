@@ -78,7 +78,7 @@ if ($structer->changeCount) {
                                   "echo-log" => true));
       $structer2->setParams(array());
       $structer2->updateDbStruct($strucTpl);
-      $structer2->reorderDbStruct($strucTpl);
+      $structer2->reorderDbStruct();
     }
     else {  // db -> structfile
       echo "Write structure file.\n";
@@ -125,11 +125,11 @@ if ($params['apply'] && !$params['reverse']) {
     foreach ($table['COLUMNS'] as $column) {
       $fieldList .= ($fieldList ? ", " : "") . "'" . $column['COLUMN_NAME'] . "'";
     }
-    $marker = "// ###:";
-    $replace = "$marker [ $fieldList ],";
-    if (preg_match("|^\s*$marker|m", $content)) {
+    $search = "^\s*//\s*fields: *";
+    if (preg_match("|$search|m", $content, $matches)) {
       $content = preg_replace("/###MODEL_NAME###/", $modelName, $content);
-      $content = preg_replace("|$marker.*$|m", $replace, $content);
+      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldList ],";
+      $content = preg_replace("|$search.*$|m", $replace, $content);
     }
     else {
       $content .= "\n$replace";
