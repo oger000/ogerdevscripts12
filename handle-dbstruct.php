@@ -18,9 +18,9 @@ set_exception_handler(null);
 
 
 Config::init();
-if (in_array("openDbAliasId", get_class_methods("Db"))) {
-  Db::openDbAliasId($dbDefAliasId);
-  $conn = Db::$conn;
+if (class_exists("Dbw")) {
+  Dbw::openDbAliasId($dbDefAliasId);
+  $conn = Dbw::$conn;
   $dbName = Config::$dbDefs[$dbDefAliasId]['dbName'];
 }
 else {  // fallback to pre12
