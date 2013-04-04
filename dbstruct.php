@@ -19,23 +19,24 @@ set_exception_handler(null);
 
 Config::init();
 if (class_exists("Dbw")) {
-  Dbw::openDbAliasId($dbDefAliasId);
+  if (Config::$dbDefs[$dbDefAliasId]['dsnConnect']) {
+    Dbw::openDbAliasId($dbDefAliasId);
+  }
+  else {   // fallback to pre12 config
+    Dbw::openDbAliasId($dbDefAliasId, array("compat" => true));
+  }
+
   $conn = Dbw::$conn;
-  $dbName = Config::$dbDefs[$dbDefAliasId]['dbName'];
+  $dbName = Dbw::$dbDef['dbName'];
 }
 else {  // fallback to pre12
   $dbDef = Config::$dbDefs[$dbDefAliasId];
   Db::init($dbDef['dbName'], $dbDef['dbUser'], $dbDef['dbPass'], $dbDef['dbAttributes']);
   $conn = Db::getConn();
 
-  list($dbDriver, $driverSpecificPart) = explode(':', $dbDef['dbName'], 2);
-  $tmpParts = explode(';', $driverSpecificPart);
-  $dsnParts = array();
-  foreach ($tmpParts as $tmpPart) {
-    list($key, $value) = explode("=", $tmpPart, 2);
-    $dsnParts[$key] = $value;
-  }
-  $dbName = $dsnParts['dbname'];
+  list($dbDriver, $tmp) = explode(':', $dbDef['dbName'], 2);
+  preg_match("/.*dbname=(.*?);/", $tmp, $matches);
+  $dbName = $matches[1];
 }
 
 
