@@ -16,6 +16,10 @@ $skipLogonCheck = true;
 require_once("php/init.inc.php");
 set_exception_handler(null);
 
+if ($params["dbDefAliasId"]) {
+  $dbDefAliasId = $params["dbDefAliasId"];
+};
+
 
 Config::init();
 if (class_exists("Dbw")) {
