@@ -10,7 +10,7 @@ require_once("config.localonly.inc.php");
 $params = getParams();
 
 // application init
-chdir(__DIR__ . "/$webRoot");
+chdir(__DIR__ . "/$projectRoot/$webDir");
 echo "\nCWD=" . getcwd() . "\n\n";
 $skipLogonCheck = true;
 require_once("php/init.inc.php");

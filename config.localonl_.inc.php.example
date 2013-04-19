@@ -1,17 +1,36 @@
 <?PHP
 
-// all other directiries are relative to webRoot
-$webRoot = "../web";
+// global settings
+$projectName = "ogerarch";
+$projectRoot = "..";  // relative to script location
 
+$webDir = "web";
+
+// for dbstruct (relative to projectRoot)
 $dbDefAliasId = "default";
-$dbStructFileName = "dbstruct/dbStruct.inc.php";
-$dbStructDumpName = "dbstruct/dbStruct.sql";
+$dbStructFileName = "$webDir/dbstruct/dbStruct.inc.php";
+$dbStructDumpName = "$webDir/dbstruct/dbStruct.sql";
 
-
-$appJsRoot = "js/app";
+// for appjs-list (relative to projectRoot)
+$appJsRoot = "$webDir/js/app";
 $appJsName = "App";
 $appJsMain = "app.js";
 $appJsList = "appjslist.inc.php";
 
+
+// for prepare dist (relative to projectroot)
+$distDir = "../dist";
+
+// maybe split into distExcludeFile and distExcludeDir ???
+$distExclude = array(
+  "/.*localonly.*/i",
+  "|devdocu\$|",
+  "|devdocu/|",
+);
+
+
+// for update-shown-version (relative to projectroot)
+$versionFile = "$webDir/config/version.inc.php";
+$distVersionFile = "DISTVERSION";
 
 ?>

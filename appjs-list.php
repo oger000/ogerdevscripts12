@@ -14,7 +14,7 @@ include('ext4aliases.inc.php');
 
 
 // application init
-chdir(__DIR__ . "/$webRoot");
+chdir(__DIR__ . "/$projectRoot/$webDir");
 echo "\nCWD=" . getcwd() . "\n\n";
 
 
