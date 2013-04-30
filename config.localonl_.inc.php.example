@@ -26,6 +26,8 @@ $distExclude = array(
   "/.*localonly.*/i",
   "|devdocu\$|",
   "|devdocu/|",
+  "|/lib/extjs4/examples/|",
+  "|/lib/extjs4/docs/|",
 );
 
 
