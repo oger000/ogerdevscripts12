@@ -6,10 +6,10 @@ $projectRoot = "..";  // relative to script location
 
 $webDir = "web";
 
-// for dbstruct (relative to projectRoot)
+// for dbstruct (relative to webDir)
 $dbDefAliasId = "default";
-$dbStructFileName = "$webDir/dbstruct/dbStruct.inc.php";
-$dbStructDumpName = "$webDir/dbstruct/dbStruct.sql";
+$dbStructFileName = "dbstruct/dbStruct.inc.php";
+$dbStructDumpName = "dbstruct/dbStruct.sql";
 
 // for appjs-list (relative to projectRoot)
 $appJsRoot = "$webDir/js/app";

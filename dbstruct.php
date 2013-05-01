@@ -54,12 +54,18 @@ $structer->setParams(array("dry-run" => true,
 $strucTpl = array();
 if (file_exists($dbStructFileName)) {
   $strucTpl = include($dbStructFileName);
+  if (!$strucTpl) {
+    echo "*** No structure found in file $dbStructFileName.\n";
+  }
+}
+else {
+  echo "*** Cannot find structure file $dbStructFileName.\n";
 }
 
 
 echo "\n***************************************************\n";
 echo "* Database: " . $dbName . "\n";
-echo "* Struct file: dbStructFileName\n";
+echo "* Struct file: $dbStructFileName\n";
 echo "***************************************************\n";
 
 if ($params['reverse']) {
