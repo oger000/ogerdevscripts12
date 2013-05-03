@@ -14,14 +14,14 @@ include('ext4aliases.inc.php');
 
 
 // application init
-chdir(__DIR__ . "/$projectRoot/$webDir");
+chdir(__DIR__ . "/$webDir");
 echo "\nCWD=" . getcwd() . "\n\n";
 
 
 #####################################
 
 
-echo "Read files from $searchDir\n";
+echo "Read files from $appJsRoot\n";
 $fileRegex = '/.*\.js$/';
 $classes = getAppClasses($appJsRoot, $fileRegex, $appJsName, $appJsMain);
 ksort($classes);

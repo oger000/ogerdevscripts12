@@ -10,7 +10,7 @@ require_once("config.localonly.inc.php");
 $params = getParams();
 
 // application init
-chdir(__DIR__ . "/$projectRoot/$webDir");
+chdir(__DIR__ . "/$webDir");
 echo "\nCWD=" . getcwd() . "\n\n";
 $skipLogonCheck = true;
 require_once("php/init.inc.php");
@@ -151,3 +151,7 @@ if ($params['apply'] && !$params['reverse']) {
 }  // eo model files
 
 echo "\n";
+
+
+
+?>

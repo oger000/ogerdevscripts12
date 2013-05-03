@@ -18,8 +18,12 @@ if (!$projectName) {
   echo "Project name not set in config file.";
   exit;
 }
-if (!$projectRoot) {
-  echo "Project root not set in config file.";
+if (!$webDir) {
+  echo "Web directory not set in config file.";
+  exit;
+}
+if (!$distRoot) {
+  echo "Distribution root not set in config file.";
   exit;
 }
 if (!$distDir) {
@@ -27,9 +31,13 @@ if (!$distDir) {
   exit;
 }
 
-chdir(__DIR__ . "/$projectRoot");
+chdir($distRoot);
 echo "\nCWD=" . getcwd() . "\n\n";
 
+if (!file_exists($distRoot)) {
+  echo "Distribution root $distRoot does not exist.\n\n";
+  exit;
+}
 if (!file_exists($distDir)) {
   echo "Distribution dir $distDir does not exist.\n\n";
   exit;
@@ -61,32 +69,19 @@ if (!mkdir($tmpDistDir, 0777, true)) {
   echo "\n*** Cannot create temp dist dir $tmpDistDir.\n\n";
   exit;
 }
-
-
-
-if (!file_exists($distDir)) {
-  echo "\n*** Cannot create dist dir $tmpDistDir.\n\n";
-  exit;
-}
-
-
 echo "\nTemporary dist dir is $tmpDistDir.\n\n";
 
 
-// MAKE THIS ANOTHER SCRIPT
-$cmd = "git log --date=iso | head -5 | grep '^commit\|^Date:'";
+
+// write dist file
+$cmd = __DIR__ . "/version-out.php";
 echo "$cmd\n";
-$revisionStr = shell_exec($cmd);
-echo "Version is:\n$revisionStr\n";
-
-echo "Write version to $versionFile.\n";
-file_put_contents($versionFile, $revisionStr);
-echo "Write version to $distVersionFile.\n";
-file_put_contents($distVersionFile, $revisionStr);
+passthru($cmd);
 
 
 
-chdir(__DIR__ . "/$projectRoot");
+// make shure we are back to dist root
+chdir($distRoot);
 
 echo "\nCopy files from " . getcwd() . " to $tmpDistDir\n";
 $copyCount = copyFiles("", "$tmpDistDir/");
@@ -94,9 +89,12 @@ echo "$copyCount files copied.\n\n";
 
 
 // apply license
-// TODO
+$cmd = __DIR__ . "/license.php startDir=$tmpDistDir";
+echo "$cmd\n";
+passthru($cmd);
 
 
+// create zip and sfx
 $zipFile = "$distDir/{$projectName}-dist@$timeStamp.zip";
 echo "\nZip from $tmpDistDir to $zipFile\n";
 zipIt($tmpDistDir, $zipFile, true);
@@ -109,6 +107,7 @@ $content .= file_get_contents($zipFile);
 file_put_contents($sfxFile, $content);
 
 $cmd = "zip -A $sfxFile";
+echo "$cmd\n";
 passthru($cmd);
 
 
@@ -270,3 +269,4 @@ function zipIt($source, $destination, $include_dir = false, $additionalIgnoreFil
 
 
 
+?>

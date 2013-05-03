@@ -2,37 +2,57 @@
 
 // global settings
 $projectName = "ogerarch";
-$projectRoot = "..";  // relative to script location
 
-$webDir = "web";
+// all directories relative to script location
 
-// for dbstruct (relative to webDir)
+$projectRoot = __DIR__ . "/..";
+$webDir = "$projectRoot/web";
+
+
+// for dbstruct
 $dbDefAliasId = "default";
-$dbStructFileName = "dbstruct/dbStruct.inc.php";
-$dbStructDumpName = "dbstruct/dbStruct.sql";
+$dbStructFileName = "$webDir/dbstruct/dbStruct.inc.php";
+$dbStructDumpName = "$webDir/dbstruct/dbStruct.sql";
 
-// for appjs-list (relative to projectRoot)
+// for appjs-list
 $appJsRoot = "$webDir/js/app";
 $appJsName = "App";
 $appJsMain = "app.js";
-$appJsList = "appjslist.inc.php";
+$appJsList = "$webDir/appjslist.inc.php";
 
 
-// for prepare dist (relative to projectroot)
-$distDir = "../dist";
+// for prepare dist
+$distRoot = "$projectRoot";
+$distDir = "$projectRoot/../dist";
 
 // maybe split into distExcludeFile and distExcludeDir ???
 $distExclude = array(
   "/.*localonly.*/i",
   "|devdocu\$|",
-  "|devdocu/|",
-  "|/lib/extjs4/examples/|",
-  "|/lib/extjs4/docs/|",
+  "|devdata\$|",
+  "|devscripts\$|",
+  "|devscripts12\$|",
+  "|/lib/extjs4/examples|",
+  "|/lib/extjs4/docs|",
+  "|/lib/extjs4/jsbuilder|",
+  "|/lib/ogerlibphp/obsolete|",
+  "|/lib/ogerlibphp12/docu|",
 );
 
 
 // for update-shown-version (relative to projectroot)
 $versionFile = "$webDir/config/version.inc.php";
-$distVersionFile = "DISTVERSION";
+$distVersionFile = "$projectRoot/DISTVERSION";
+
+
+// for licence
+$licenseFile = "$projectRoot/LICENSE";
+
+$licenseExclude = array(
+  "|/lib/extjs4|",
+  "|/lib/tcpdf|",
+);
+
+
 
 ?>
