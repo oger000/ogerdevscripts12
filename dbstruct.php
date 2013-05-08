@@ -114,21 +114,21 @@ else {
 }
 
 
-if ($params['apply'] && !$params['reverse']) {
+if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
   echo "\n\n***************************************************\n";
-  echo "*** Update models:\n";
+  echo "*** Create/update models in $appJsRoot/model:\n";
   $tplFile = "$appJsRoot/model/template";
   foreach ($dbStruct['TABLES'] as $table) {
     $tableName = $table['TABLE_META']['TABLE_NAME'];
     $modelName = "$appJsName.model." . ucfirst($tableName);
     $modelFile = "$appJsRoot/model/" . ucfirst($tableName) . ".js";
-    echo "* $modelName\n";
     if (file_exists($modelFile)) {
       $content = file_get_contents($modelFile);
+      $contentBak = $content;
     }
     else {
       if (!file_exists($tplFile)) {
-        echo "  Skip create model (missing template).\n";
+        echo "* $modelName - Skip create model (missing template).\n";
         continue;
       }
       $content = file_get_contents($tplFile);
@@ -146,13 +146,41 @@ if ($params['apply'] && !$params['reverse']) {
     else {
       $content .= "\n$replace";
     }
-    echo "  Write $modelFile\n";
-    file_put_contents($modelFile, $content);
+    if ($content != $contentBak) {
+      echo "* $modelName - Write file.\n";
+      file_put_contents($modelFile, $content);
+    }
+    else {
+      // echo " - Unchanged.\n";
+    }
   }
+  echo "*** Update models finished.\n";
 }  // eo model files
 
 echo "\n";
 
+
+// sync pre12 dbstruct
+echo "\n\n***************************************************\n";
+echo "* Sync pre12 database struct\n";
+echo "***************************************************\n";
+
+$oldDir = getcwd();
+$oldDevScriptsDir = __DIR__ . "/../devscripts";
+$oldDevStructUpd = "update-dbinfo.sh";
+if (file_exists("$oldDevScriptsDir/$oldDevStructUpd")) {
+  echo "Chdir $oldDevScriptsDir\n";
+  chdir($oldDevScriptsDir);
+  $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --da default";
+  if ($params['apply'] && !$params['reverse']) {
+    // ONLY DINFO - DO NOT APPLY  // $cmd .= " apply";
+  }
+  passthru($cmd);
+  chdir($oldDir);
+}
+else {
+  echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
+}
 
 
 ?>
