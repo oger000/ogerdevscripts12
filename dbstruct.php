@@ -161,26 +161,29 @@ echo "\n";
 
 
 // sync pre12 dbstruct
-echo "\n\n***************************************************\n";
-echo "* Sync pre12 database struct\n";
-echo "***************************************************\n";
+if (!$params['no-pre12']) {
 
-$oldDir = getcwd();
-$oldDevScriptsDir = __DIR__ . "/../devscripts";
-$oldDevStructUpd = "update-dbinfo.sh";
-if (file_exists("$oldDevScriptsDir/$oldDevStructUpd")) {
-  echo "Chdir $oldDevScriptsDir\n";
-  chdir($oldDevScriptsDir);
-  $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --da default";
-  if ($params['apply'] && !$params['reverse']) {
-    // ONLY DINFO - DO NOT APPLY  // $cmd .= " apply";
+  echo "\n\n***************************************************\n";
+  echo "* Sync pre12 database struct\n";
+  echo "***************************************************\n";
+
+  $oldDir = getcwd();
+  $oldDevScriptsDir = __DIR__ . "/../devscripts";
+  $oldDevStructUpd = "update-dbinfo.sh";
+  if (file_exists("$oldDevScriptsDir/$oldDevStructUpd")) {
+    echo "Chdir $oldDevScriptsDir\n";
+    chdir($oldDevScriptsDir);
+    $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --da default";
+    if ($params['apply-pre12'] && !$params['reverse']) {
+      $cmd .= " apply";
+    }
+    passthru($cmd);
+    chdir($oldDir);
   }
-  passthru($cmd);
-  chdir($oldDir);
-}
-else {
-  echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
-}
+  else {
+    echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
+  }
 
+}  // eo pre12
 
 ?>
