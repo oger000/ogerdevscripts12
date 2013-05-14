@@ -93,6 +93,8 @@ if ($structer->changeCount) {
       $structer2->reorderDbStruct();
     }
     else {  // db -> structfile
+      // mysqldump -u $DBUSER $DBPASS $DBNAME --no-data | sed 's/ AUTO_INCREMENT=[0-9]*\b//'> $OUTFILE
+      // this does not work with pre12 config file
       echo "Write structure file.\n";
       file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
       $pass = Config::$dbDefs[$dbDefAliasId]['pass'];
