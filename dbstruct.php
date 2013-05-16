@@ -57,10 +57,12 @@ if (file_exists($dbStructFileName)) {
   $strucTpl = include($dbStructFileName);
   if (!$strucTpl) {
     echo "*** No structure found in file $dbStructFileName.\n";
+    exit;
   }
 }
 else {
   echo "*** Cannot find structure file $dbStructFileName.\n";
+  exit;
 }
 
 
@@ -84,13 +86,19 @@ if ($structer->changeCount) {
   echo "\n";
   if ($params['apply']) {
     if ($params['reverse']) {  // structfile -> db
-      $structer2 = new OgerDbStructMysql($conn, $dbName);
-      $structer->setParams(array("dry-run" => false,
-                                  "log-level" => $structer::LOG_NOTICE,
-                                  "echo-log" => true));
-      $structer2->setParams(array());
-      $structer2->updateDbStruct($strucTpl);
-      $structer2->reorderDbStruct();
+      if (class_exists("Dbw")) {  // update with log
+        Dbw::$struct = $strucTpl;
+        Dbw::checkStruct();
+      }
+      else {  // plain update
+        $structer2 = new OgerDbStructMysql($conn, $dbName);
+        $structer->setParams(array("dry-run" => false,
+                                    "log-level" => $structer::LOG_NOTICE,
+                                    "echo-log" => true));
+        $structer2->setParams(array());
+        $structer2->updateDbStruct($strucTpl);
+        $structer2->reorderDbStruct();
+      }
     }
     else {  // db -> structfile
       // mysqldump -u $DBUSER $DBPASS $DBNAME --no-data | sed 's/ AUTO_INCREMENT=[0-9]*\b//'> $OUTFILE
