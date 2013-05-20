@@ -35,6 +35,7 @@ if (class_exists("Dbw")) {
   $dbName = Dbw::$dbDef['dbName'];
 }
 else {  // fallback to pre12
+  throw new Exeption("Need Dbw class to process.");
   $dbDef = Config::$dbDefs[$dbDefAliasId];
   Db::init($dbDef['dbName'], $dbDef['dbUser'], $dbDef['dbPass'], $dbDef['dbAttributes']);
   $conn = Db::getConn();
@@ -101,17 +102,18 @@ if ($structer->changeCount) {
       }
     }
     else {  // db -> structfile
-      // mysqldump -u $DBUSER $DBPASS $DBNAME --no-data | sed 's/ AUTO_INCREMENT=[0-9]*\b//'> $OUTFILE
-      // this does not work with pre12 config file
+      // Dbw compat-open should have converted the config from pre12 format
+      $dbDef = Dbw::$dbDef;
+
       echo "Write structure file.\n";
       file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
+
+      echo "Dump database structure ($cmd).\n";
       $pass = Config::$dbDefs[$dbDefAliasId]['pass'];
       $pass = ($pass ? "-p$pass" : "");
-      $cmd = "mysqldump -u " . Config::$dbDefs[$dbDefAliasId]['user'] .
-             " $pass" .
-             " " . $dbName .
-             " --no-data > $dbStructDumpName";
-      echo "Dump database structure ($cmd).\n";
+      $cmd = "mysqldump -u {$dbDef['user']} $pass {$dbDef['dbName']} --no-data " .
+             " | sed 's/ AUTO_INCREMENT=[0-9]*\b//' " .
+             " > $dbStructDumpName";
       passthru($cmd);
     }
   }
@@ -173,7 +175,8 @@ echo "\n";
 // sync pre12 dbstruct
 if (!$params['no-pre12']) {
 
-  echo "\n\n***************************************************\n";
+  echo "\n\n";
+  echo "***************************************************\n";
   echo "* Sync pre12 database struct\n";
   echo "***************************************************\n";
 
