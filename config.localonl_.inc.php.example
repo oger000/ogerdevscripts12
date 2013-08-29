@@ -15,7 +15,8 @@ $dbStructFileName = "$webDir/dbstruct/dbStruct.inc.php";
 $dbStructDumpName = "$webDir/dbstruct/dbStruct.sql";
 
 // for appjs-list
-$appJsRoot = "$webDir/js/app";
+$appJsRel = "js/app";
+$appJsRoot = "$webDir/$appJsRel";
 $appJsName = "App";
 $appJsMain = "app.js";
 $appJsList = "$webDir/appjslist.inc.php";

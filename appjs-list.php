@@ -14,7 +14,7 @@ include('ext4aliases.inc.php');
 
 
 // application init
-chdir(__DIR__ . "/$webDir");
+chdir($appJsRoot);
 echo "\nCWD=" . getcwd() . "\n\n";
 
 
@@ -32,7 +32,7 @@ $classesNew = sortDeps($classes, $appJsName, $appJsMain);
 
 $out = "";
 foreach ($classesNew as $className => $dummy) {
-  $out .= $appJsRoot .
+  $out .= $appJsRel .
            str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appJsName))) . ".js\n";
 }
 
