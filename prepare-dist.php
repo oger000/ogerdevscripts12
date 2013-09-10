@@ -51,9 +51,14 @@ echo "Check for clean repository.\n";
 echo "$cmd\n";
 $out = shell_exec($cmd);
 echo "$out";
-if (trim($out) && !$params["dirty"]) {
+if (trim($out)) {
   echo "*** Repository is dirty.\n";
-  exit;
+  if ($params["dirty"]) {
+    echo "*** Dirty repository forced - continue.\n";
+  }
+  else {
+    exit;
+  }
 }
 else {
   echo "Repository is clean.\n";
