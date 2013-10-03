@@ -325,12 +325,12 @@ function sortDeps($classes, $appName, $appJs) {
       echo "\n";
 
       // - circular check (direct backpointer at least)
-      foreach ($deps as $className => $classDeps) {
-        foreach ($classDeps as $depName) {
-          foreach ($deps[$depName] as $otherDeps) {
-            foreach ($otherDeps as $otherDep) {
+      foreach ((array)$deps as $className => $classDeps) {
+        foreach ((array)$classDeps as $depName) {
+          foreach ((array)$deps[$depName] as $otherDeps) {
+            foreach ((array)$otherDeps as $otherDep) {
               if ($otherDep == $className) {
-                echo "* Curcular dependency $className <-> $backDep\n";
+                echo "* Curcular dependency $className <-> $depName\n";
               }
             }
           }

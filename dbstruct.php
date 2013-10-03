@@ -129,7 +129,7 @@ else {
 if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
   echo "\n\n***************************************************\n";
   echo "*** Create/update models in $appJsRoot/model:\n";
-  $tplFile = "$appJsRoot/model/template";
+  $tplFile = "$appJsRoot/model/Model.tpl";
   foreach ($dbStruct['TABLES'] as $table) {
     $tableName = $table['TABLE_META']['TABLE_NAME'];
     $modelName = "$appJsName.model." . ucfirst($tableName);
@@ -175,15 +175,17 @@ echo "\n";
 // sync pre12 dbstruct
 if (!$params['no-pre12']) {
 
-  echo "\n\n";
-  echo "***************************************************\n";
-  echo "* Sync pre12 database struct\n";
-  echo "***************************************************\n";
-
   $oldDir = getcwd();
   $oldDevScriptsDir = __DIR__ . "/../devscripts";
   $oldDevStructUpd = "update-dbinfo.sh";
+
   if (file_exists("$oldDevScriptsDir/$oldDevStructUpd")) {
+
+    echo "\n\n";
+    echo "***************************************************\n";
+    echo "* Sync pre12 database struct\n";
+    echo "***************************************************\n";
+
     echo "Chdir $oldDevScriptsDir\n";
     chdir($oldDevScriptsDir);
     $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --da default";
@@ -194,7 +196,7 @@ if (!$params['no-pre12']) {
     chdir($oldDir);
   }
   else {
-    echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
+    // be silent - echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
   }
 
 }  // eo pre12
