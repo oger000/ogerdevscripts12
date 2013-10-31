@@ -119,7 +119,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
     if ($shortFileName != DIRECTORY_SEPARATOR . $appMain) {
       // TODO this is very dumb, should be refined
       if (!preg_match('|' . preg_quote($className) . '|', $content)) {
-        echo "Warning: Cannot find class $className in $dirName$fileName.\n";
+        echo "Warning: Cannot find class $className in $dirName/$fileName.\n";
         exit;
       }
     }
