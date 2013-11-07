@@ -165,7 +165,8 @@ function sortDeps($classes, $appName, $appJs) {
 
     // remove comments
     $content = preg_replace('|/\*.*?\*/|s', '', $content);
-    $content = preg_replace('|^\s*//.*$|m', '', $content);
+    // following can produce unwanted matches e.g. if in string
+    $content = preg_replace('|//.*$|m', '', $content);
 
     // collect class name dependencies
     // search for application classes mentioned somewhere
