@@ -127,13 +127,17 @@ else {
 
 
 if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
+
   echo "\n\n***************************************************\n";
   echo "*** Create/update models in $appJsRoot/model:\n";
   $tplFile = "$appJsRoot/model/Model.tpl";
+
   foreach ($dbStruct['TABLES'] as $table) {
+
     $tableName = $table['TABLE_META']['TABLE_NAME'];
     $modelName = "$appJsName.model." . ucfirst($tableName);
     $modelFile = "$appJsRoot/model/" . ucfirst($tableName) . ".js";
+
     if (file_exists($modelFile)) {
       $content = file_get_contents($modelFile);
       $contentBak = $content;
@@ -145,19 +149,60 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
       }
       $content = file_get_contents($tplFile);
     }
-    $fieldList = "";
-    foreach ($table['COLUMNS'] as $column) {
-      $fieldList .= ($fieldList ? ", " : "") . "'" . $column['COLUMN_NAME'] . "'";
-    }
-    $search = "^\s*//\s*fields: *";
+
+    $excludeCols = array();
+    $search = "^\s*//\s*exclude-fields:\s*(.*)$";
     if (preg_match("|$search|m", $content, $matches)) {
-      $content = preg_replace("/###MODEL_NAME###/", $modelName, $content);
-      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldList ],";
+      $tmp = explode(",", $matches[1]);
+      foreach ($tmp as &$column) {
+        $column = trim($column);
+        $excludeCols[$column] = $column;
+      }
+    }
+
+    $fieldList = "";
+    $fieldListAll = "";
+    foreach ($table['COLUMNS'] as $column) {
+      $colName = $column['COLUMN_NAME'];
+      $fieldListAll .= ($fieldListAll ? ", " : "") . "'{$colName}'";
+      if (trim($fieldList) && substr(trim($fieldList), -1) != ",") {
+        $fieldList .= ", ";
+      }
+      if ($excludeCols[$colName]) {
+        $fieldList .= " " . str_repeat(" ", strlen($colName)) . "   ";
+        continue;
+      }
+      $fieldList .= "'{$colName}'";
+//echo "fildlis=$fieldList\n";
+    }
+
+    $search = "^\s*//\s*fields: *";
+    $replace = "//fields: " . "[ $fieldListAll ]";
+    if (preg_match("|$search|m", $content, $matches)) {
+      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldListAll ],";
       $content = preg_replace("|$search.*$|m", $replace, $content);
     }
     else {
+      // add to end, if no marker found
       $content .= "\n$replace";
     }
+
+    $search = "^\s*fields: *";
+    if (preg_match("|$search|m", $content, $matches)) {
+      $fieldList = trim($fieldList);
+      if (substr($fieldList, -1) != ",") {
+        $fieldList .= ",";
+      }
+      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldList";
+      $content = preg_replace("|$search.*$|m", $replace, $content);
+    }
+    else {
+      echo "* $modelName - No field marker found.\n";
+      //$content .= "\n$replace";
+    }
+
+    $content = preg_replace("/###MODEL_NAME###/", $modelName, $content);
+
     if ($content != $contentBak) {
       echo "* $modelName - Write file.\n";
       file_put_contents($modelFile, $content);
