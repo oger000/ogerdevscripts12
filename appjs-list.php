@@ -57,6 +57,12 @@ if ($params['apply']) {
   }
 }
 else {
+  $tmpName = tempnam("/tmp", "applist");
+  if (file_put_contents($tmpName, $out) === false) {
+    echo "ERROR on write to $tmpName.\n";
+  }
+  passthru("diff -u {$appJsList} {$tmpName}");
+  unlink($tmpName);
   echo "  - Check-only. Do not write file list.\n";
 }
 echo "\n";
