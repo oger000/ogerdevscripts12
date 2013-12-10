@@ -233,7 +233,7 @@ if (!$params['no-pre12']) {
 
     echo "Chdir $oldDevScriptsDir\n";
     chdir($oldDevScriptsDir);
-    $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --da default";
+    $cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --suppress-missing-class --da default";
     if ($params['apply-pre12'] && !$params['reverse']) {
       $cmd .= " apply";
     }
