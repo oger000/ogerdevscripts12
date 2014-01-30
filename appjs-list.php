@@ -1,6 +1,11 @@
 #!/usr/bin/php
 <?PHP
 
+/**
+ * Search for definition time dependencies and create
+ * dependency-sorted list to load js files
+ */
+
 error_reporting((E_ALL | E_STRICT));
 error_reporting(error_reporting() ^ E_NOTICE);
 
@@ -125,7 +130,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
     if ($shortFileName != DIRECTORY_SEPARATOR . $appMain) {
       // TODO this is very dumb, should be refined
       if (!preg_match('|' . preg_quote($className) . '|', $content)) {
-        echo "Warning: Cannot find class $className in $dirName/$fileName.\n";
+        echo "Warning: Cannot find class '{$className}' in $dirName/$fileName.\n";
         exit;
       }
     }
@@ -145,7 +150,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 
 
 /*
-* Sort dependencies
+* Detect dependencies and sort those.
 */
 function sortDeps($classes, $appName, $appJs) {
 
@@ -174,8 +179,49 @@ function sortDeps($classes, $appName, $appJs) {
     // following can produce unwanted matches e.g. if in string
     $content = preg_replace('|//.*$|m', '', $content);
 
+    // remove functions (inside listeners and elsewhere, because those are
+    // hopefully called after loading all js files)
+    // see: http://stackoverflow.com/questions/2300939/find-matching-brackets-using-regular-expression
+    // see: http://stackoverflow.com/questions/2348547/pcre-find-matching-brace-for-code-block
+    // see: http://stackoverflow.com/questions/2300939/find-matching-brackets-using-regular-expression
+    /*
+    // THIS DOES NOT WORK AS EXPECTED, SO DISABLED
+    // and even if works maybe a wrong solution - better use Ext.require and
+    // disable looking for application class files "somewhere"
+    $content = preg_replace("#function\s*\([^\)]*\)\s*\{((?>[^\{\}]+)|(?R))*\}#x", "", $content);
+    */
+
     // collect class name dependencies
+
+    // search for "Ext.require(...)"
+    if (preg_match_all("#Ext\.require\s*\((.*?)\)#s", $content, $matches)) {
+      foreach ($matches[1] as $depMatch) {
+        foreach (explodeDeps($depMatch, $appName) as $depClass) {
+          $deps[$className][$depClass] = $depClass;
+        }
+      }
+    }
+    // search for "requires: [...]"
+    // depends on [] delimiter, but I am not shure if those are mandatory
+    if (preg_match_all("#requires\s*:\s*\[(.*?)\]#s", $content, $matches)) {
+      foreach ($matches[1] as $depMatch) {
+        foreach (explodeDeps($depMatch, $appName) as $depClass) {
+          $deps[$className][$depClass] = $depClass;
+        }
+      }
+    }
+    // search for "extend:"
+    if (preg_match_all("#extend\s*:\s*(.*?),#s", $content, $matches)) {
+      foreach ($matches[1] as $depMatch) {
+        foreach (explodeDeps($depMatch, $appName) as $depClass) {
+          $deps[$className][$depClass] = $depClass;
+        }
+      }
+    }
+
     // search for application classes mentioned somewhere
+    // disabled: use explicit require statements (see above)
+    /*
     if (preg_match_all("|($appName\..*?)['\"]|", $content, $matches)) {
       foreach ($matches[1] as $depClass) {
         // the own class is not a dependency
@@ -185,6 +231,7 @@ function sortDeps($classes, $appName, $appJs) {
         $deps[$className][$depClass] = $depClass;
       }
     }
+    */
 
     // collect xtype alias (asume one alias per class/file ?)
     if (preg_match_all("|alias\s*:\s*['\"]widget\.(\w+)['\"]|", $content, $matches)) {
@@ -359,6 +406,41 @@ function sortDeps($classes, $appName, $appJs) {
 
   return $classesNew;
 }  // eo check js names
+
+
+
+/*
+* Explode classes given as string or json array in string
+*/
+function explodeDeps($str, $app) {
+
+  $str = trim($str);
+  $appPrefix = "{$app}.";
+
+  // handle json array []
+  if (substr(str, 0, 1) == "[") {
+    $str = trim(substr(str, 1));
+    $pos = strpos(str, "]");
+    if ($pos !== false) {
+      $str = trim(substr($str, 0, $pos));
+    }
+  }
+
+  // remove delimiter (simple)
+  $str = str_replace("'", "", $str);
+  $str = str_replace('"', "", $str);
+
+  $classList = array();
+  foreach (explode(",", $str) as $str) {
+    // only handle app dependencies
+    if (strpos($str, $appPrefix) !== 0) {
+      continue;
+    }
+    $classList[] = trim($str);
+  }
+
+  return($classList);
+}  // eo explode deps
 
 
 
