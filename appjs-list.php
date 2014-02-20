@@ -191,7 +191,21 @@ function sortDeps($classes, $appName, $appJs) {
     $content = preg_replace("#function\s*\([^\)]*\)\s*\{((?>[^\{\}]+)|(?R))*\}#x", "", $content);
     */
 
+    // --------------------------------
     // collect class name dependencies
+
+    // beside the above recommended usage of Ext.require we look for creating of stores
+    // because this is normally only used in grids and for combos
+    if (preg_match_all("#Ext\.create\s*\([\s'\"]*({$appName}\.store\..*?)\)#s", $content, $matches)) {
+      foreach ($matches[1] as $depMatch) {
+        foreach (explodeDeps($depMatch, $appName) as $depClass) {
+          $deps[$className][$depClass] = $depClass;
+          //echo "$depClass from $className\n";
+        }
+      }
+    }
+
+
 
     // search for "Ext.require(...)"
     if (preg_match_all("#Ext\.require\s*\((.*?)\)#s", $content, $matches)) {
