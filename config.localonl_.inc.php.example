@@ -6,25 +6,26 @@ $projectName = "ogerarch";
 // all directories relative to script location
 
 $projectRoot = __DIR__ . "/..";
-$webDir = "$projectRoot/web";
+$webDir = "{$projectRoot}/web";
 
 
 // for dbstruct
 $dbDefAliasId = "default";
-$dbStructFileName = "$webDir/dbstruct/dbStruct.inc.php";
-$dbStructDumpName = "$webDir/dbstruct/dbStruct.sql";
+$dbStructFileName = "{$webDir}/dbstruct/dbStruct.inc.php";
+$dbStructDumpName = "{$webDir}/dbstruct/dbStruct.sql";
 
 // for appjs-list
 $appJsRel = "js/app";
-$appJsRoot = "$webDir/$appJsRel";
+$appJsRoot = "{$webDir}/{$appJsRel}";
 $appJsName = "App";
 $appJsMain = "app.js";
-$appJsList = "$webDir/appjslist.inc.php";
+$appJsList = "{$webDir}/appjslist.inc.php";
+$appJsBuildsDir = "{$webDir}/js/builds";
 
 
 // for prepare dist
 $distRoot = "$projectRoot";
-$distDir = "$projectRoot/../dist";
+$distDir = "{$projectRoot}/../dist";
 
 // maybe split into distExcludeFile and distExcludeDir ???
 $distExclude = array(

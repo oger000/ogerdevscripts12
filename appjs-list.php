@@ -46,19 +46,38 @@ if (count($classesNew) < count($classes) && $params['partial'] == "add") {
   $out .= "\n";
   foreach ($classes as $className => $dummy) {
     if (!$classesNew[$className]) {
-      $out .= $appJsRoot .
-               str_replace('.', DIRECTORY_SEPARATOR, substr($className, strlen($appJsName))) . ".js\n";
+      $out .= $appJsRel .
+               str_replace(".", DIRECTORY_SEPARATOR, substr($className, strlen($appJsName))) . ".js\n";
     }
   }
 }  // add unresolved
+
+// finaly add app main js because skipped in get app classes
+$out .= $appJsRel . DIRECTORY_SEPARATOR . $appJsMain . "\n";
 
 
 // update index appjs include
 echo "\n";
 if ($params['apply']) {
-  echo "Write appjs file list $appJsList.\n";
+  echo "Write appjs file list {$appJsList}.\n";
   if (file_put_contents($appJsList, $out) === false) {
-    echo "ERROR on write to $appJsList.\n";
+    echo "ERROR on write to {$appJsList}.\n";
+  }
+  // write js builds
+  if (!file_exists($appJsBuildsDir)) {
+    mkdir($appJsBuildsDir);
+  }
+  $fileName = "app-concat.js";
+  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+  $out = buildAppJsConcat($out, $webDir);
+  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+  }
+  $fileName = "app-debug.js";
+  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+  $out = buildAppJsDebug($out);
+  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
 }
 else {
@@ -68,7 +87,7 @@ else {
   }
   passthru("diff -u {$appJsList} {$tmpName}");
   unlink($tmpName);
-  echo "  - Check-only. Do not write file list.\n";
+  echo "\n  - Check-only. Do not write file list.\n";
 }
 echo "\n";
 
@@ -102,7 +121,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 
   while (($fileName = readdir($dh)) !== false) {
 
-    $searchFileName = "$dirName/$fileName";
+    $searchFileName = "{$dirName}/{$fileName}";
 
     if (is_dir($searchFileName)) {
       if (substr($fileName, 0, 1) == '.') {
@@ -118,21 +137,23 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
       continue;
     }
 
+    // exclude app main js, because this has no class name
+    // and is added as final file anyway
+    if (substr($searchFileName, -1 - strlen($appMain)) == DIRECTORY_SEPARATOR . $appMain) {
+      continue;
+    }
+
     // make classname out of directory  name
     // remove startdir (leading slash remains) and extension
     $shortFileName = substr($searchFileName, strlen($startDir));
     $className = $appName . str_replace(DIRECTORY_SEPARATOR, '.', substr($shortFileName, 0, -3));
 
     // check if file contains class name
+    // TODO this is very dumb, should be refined
     $content = file_get_contents($searchFileName);
-
-    // exclude app main js, because this has no class name
-    if ($shortFileName != DIRECTORY_SEPARATOR . $appMain) {
-      // TODO this is very dumb, should be refined
-      if (!preg_match('|' . preg_quote($className) . '|', $content)) {
-        echo "Warning: Cannot find class '{$className}' in $dirName/$fileName.\n";
-        exit;
-      }
+    if (!preg_match('|' . preg_quote($className) . '|', $content)) {
+      echo "Warning: Cannot find class '{$className}' in $dirName/$fileName.\n";
+      exit;
     }
 
     // add content to class array
@@ -455,6 +476,75 @@ function explodeDeps($str, $app) {
 
   return($classList);
 }  // eo explode deps
+
+
+
+
+/*
+* Build app js concat from js file list
+*/
+function buildAppJsConcat($jsFileList, $webRoot) {
+
+  $out = "";
+
+  $fileList = explode("\n", $jsFileList);
+  foreach ($fileList as $fileName) {
+    $fileName = trim($fileName);
+    // skip comments
+    if (substr($fileName, 0, 2) == "//") {
+      continue;
+    }
+    // skip empty lines
+    if (!$fileName) {
+      continue;
+    }
+    $out .= file_get_contents("{$webRoot}/{$fileName}") . "\n";
+  }
+
+  // get first license text
+  $search = "|/\*\s*#LICENSE BEGIN.*?#LICENSE END\s*\*/|ms";
+  preg_match($search, $out, $matches);
+  $license = $matches[0];
+  // remove all license text and reinsert first one
+  $out = preg_replace($search, "", $out);
+  $out = "{$license}{$out}";
+
+  return $out;
+}  // eo build app js concat
+
+
+
+/*
+* Build app js debug from js concat file
+* Remove comments but preserve line numbers
+*/
+function buildAppJsDebug($jsConcat) {
+
+  $out = $jsConcat;
+return $out;
+
+  // get first license text
+  $search = "|/\*\s*#LICENSE BEGIN.*?#LICENSE END\s*\*/|ms";
+  preg_match($search, $out, $matches);
+  $license = $matches[0];
+
+  // remove all single line comments
+//DOES NOT WORK removes SOMETIMES too much - empty lines befor or after comment
+  $out = preg_replace("|\s*//.*$|mU", "", $out);
+
+  // remove multiline comments with fitting count of line breaks
+
+  //$out = "{$license}{$out}";
+
+  return $out;
+}  // eo build app js concat
+
+
+
+
+
+
+
 
 
 
