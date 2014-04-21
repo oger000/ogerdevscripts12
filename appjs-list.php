@@ -67,15 +67,22 @@ if ($params['apply']) {
   if (!file_exists($appJsBuildsDir)) {
     mkdir($appJsBuildsDir);
   }
-  $fileName = "app-concat.js";
+  $fileName = "app-all-concat.js";
   echo "Write {$fileName} to {$appJsBuildsDir}.\n";
   $out = buildAppJsConcat($out, $webDir);
+  $appJsConcat = $out;
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
-  $fileName = "app-debug.js";
+  $fileName = "app-all-debug.js";
   echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsDebug($out);
+  $out = buildAppJsDebug($appJsConcat);
+  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+  }
+  $fileName = "app-all.js";
+  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+  $out = buildAppJsMinified($appJsConcat);
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
@@ -517,34 +524,60 @@ function buildAppJsConcat($jsFileList, $webRoot) {
 /*
 * Build app js debug from js concat file
 * Remove comments but preserve line numbers
+* TODO: refine methods. Currently marker (//, /* * /)
+* inside of text strings result in corrupt script.
 */
 function buildAppJsDebug($jsConcat) {
 
   $out = $jsConcat;
-return $out;
 
-  // get first license text
-  $search = "|/\*\s*#LICENSE BEGIN.*?#LICENSE END\s*\*/|ms";
+  // get and remove first license text
+  $search = "|/[ \t]*\*\s*#LICENSE BEGIN.*?#LICENSE END\s*\*/[ \t]*|s";
   preg_match($search, $out, $matches);
   $license = $matches[0];
+  $out = preg_replace($search, "", $out, 1);
 
   // remove all single line comments
-//DOES NOT WORK removes SOMETIMES too much - empty lines befor or after comment
-  $out = preg_replace("|\s*//.*$|mU", "", $out);
+  // this DOES NOT WORK:
+  //$out = preg_replace("|\s*//.*$|mU", "", $out);
+  // looks like php 5.3 includes line-breaks into whitespace collecting
+  // after "^" and before "$" so try following workaround
+  $out = preg_replace("|[ \t]*//.*?$|m", "", $out);
 
   // remove multiline comments with fitting count of line breaks
+  $matches2 = array();
+  preg_match_all("|[ \t]*/\*.*?\*/[ \t]*|s", $out, $matches);
+  // preserve multiple maches only once by using as key
+  foreach ($matches[0] as $match) {
+    $matches2[$match] = $match;
+  }
+  foreach ($matches2 as $match) {
+    $repl = preg_replace("/[^\n\r]+/", "", $match);
+    $match = preg_quote($match, "|");
+    $out = preg_replace("|{$match}|", $repl, $out);
+  }
 
-  //$out = "{$license}{$out}";
 
+  $out = "{$license}{$out}";
   return $out;
 }  // eo build app js concat
 
 
 
 
+/*
+* Build minified app js from debug version
+* TODO use UglifyJS2 or something to realy minify
+*/
+function buildAppJsMinified($jsConcat) {
 
+  $out = buildAppJsDebug($jsConcat);
 
+  // remove empty lines to do anything ;-)
+  $out = preg_replace("/^\s+$/ms", "", $out);
 
+  return $out;
+}  // eo build minified app js
 
 
 
