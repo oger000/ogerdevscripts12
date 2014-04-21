@@ -81,7 +81,7 @@ if ($params['apply']) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
   $fileName = "app-all.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+  echo "Uglify {$fileName} to {$appJsBuildsDir}.\n";
   $out = buildAppJsMinified($appJsConcat);
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
@@ -567,14 +567,28 @@ function buildAppJsDebug($jsConcat) {
 
 /*
 * Build minified app js from debug version
-* TODO use UglifyJS2 or something to realy minify
 */
 function buildAppJsMinified($jsConcat) {
 
   $out = buildAppJsDebug($jsConcat);
 
-  // remove empty lines to do anything ;-)
-  $out = preg_replace("/^\s+$/ms", "", $out);
+  $cmd = "/usr/bin/uglifyjs";
+  if (file_exists($cmd)) {
+    $f1nam = tempnam("/tmp", "uglify");
+    file_put_contents($f1nam, $out);
+    $f2nam = tempnam("/tmp", "uglify");
+    $cmd .= " {$f1nam} -o {$f2nam} -c -m";
+    echo "{$cmd}\n";
+    passthru($cmd);
+    $out = file_get_contents($f2nam);
+    unlink($f1nam);
+    unlink($f2nam);
+  }
+  else {  // no uglifyjs
+    echo "No real js minifier found - remove empty lines only.\n";
+    // remove empty lines to do anything ;-)
+    $out = preg_replace("/^\s*$/ms", "", $out);
+  }
 
   return $out;
 }  // eo build minified app js
