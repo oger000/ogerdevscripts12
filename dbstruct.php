@@ -202,7 +202,7 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
       file_put_contents($modelFile, $content);
     }
     else {
-      // echo " - Unchanged.\n";
+      //echo "*** {$modelFile} unchanged.\n";
     }
   }
   echo "*** Update models finished.\n";
