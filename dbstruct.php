@@ -151,7 +151,7 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
     }
 
     $excludeCols = array();
-    $search = "^\s*//\s*exclude-fields:\s*(.*)$";
+    $search = "^\s*//\s*autogen-exclude:\s*(.*)$";
     if (preg_match("|$search|m", $content, $matches)) {
       $tmp = explode(",", $matches[1]);
       foreach ($tmp as &$column) {
@@ -161,40 +161,34 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
     }
 
     $fieldList = "";
-    $fieldListAll = "";
     foreach ($table['COLUMNS'] as $column) {
       $colName = $column['COLUMN_NAME'];
-      $fieldListAll .= ($fieldListAll ? ", " : "") . "'{$colName}'";
-      if (trim($fieldList) && substr(trim($fieldList), -1) != ",") {
-        $fieldList .= ", ";
-      }
       if ($excludeCols[$colName]) {
-        $fieldList .= " " . str_repeat(" ", strlen($colName)) . "   ";
         continue;
       }
-      $fieldList .= "'{$colName}'";
-//echo "fildlis=$fieldList\n";
-    }
-
-    $search = "^\s*//\s*fields: *";
-    $replace = "//fields: " . "[ $fieldListAll ]";
-    if (preg_match("|$search|m", $content, $matches)) {
-      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldListAll ],";
-      $content = preg_replace("|$search.*$|m", $replace, $content);
-    }
-    else {
-      // add to end, if no marker found
-      $content .= "\n$replace";
-    }
-
-    $search = "^\s*fields: *";
-    if (preg_match("|$search|m", $content, $matches)) {
-      $fieldList = trim($fieldList);
-      if (substr($fieldList, -1) != ",") {
-        $fieldList .= ",";
+      // add type to fire the appropriate reader
+      if ($column['DATA_TYPE'] == "date") {
+        $fieldList .= "{ name: '{$colName}', type: 'date' },\n    ";
       }
-      $replace = $matches[0] . (substr($matches[0], -1) == " " ? "" : " ") . "[ $fieldList";
-      $content = preg_replace("|$search.*$|m", $replace, $content);
+      elseif ($column['DATA_TYPE'] == "decimal") {
+        $fieldList .= "{ name: '{$colName}', type: 'float' },\n    ";
+      }
+      elseif ($column['DATA_TYPE'] == "int" ||
+              $column['DATA_TYPE'] == "tinyint") {
+        $fieldList .= "{ name: '{$colName}', type: 'int' },\n    ";
+      }
+      else {
+        $fieldList .= "'{$colName}',\n    ";
+      }
+    }
+    $fieldList = trim($fieldList);
+
+    $search = "(//\s*autogen-begin>[ \t]*)(.*?)(//\s*<autogen-end)";
+    if (preg_match("|$search|s", $content, $matches)) {
+      $matches[1] = trim($matches[1]);
+      $search = preg_quote($matches[0], "|");
+      $replace = "{$matches[1]}\n    {$fieldList}\n  {$matches[3]}";
+      $content = preg_replace("|$search|s", $replace, $content);
     }
     else {
       echo "* $modelName - No field marker found.\n";
