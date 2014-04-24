@@ -59,14 +59,17 @@ $out .= $appJsRel . DIRECTORY_SEPARATOR . $appJsMain . "\n";
 // update index appjs include
 echo "\n";
 if ($params['apply']) {
+
   echo "Write appjs file list {$appJsList}.\n";
   if (file_put_contents($appJsList, $out) === false) {
     echo "ERROR on write to {$appJsList}.\n";
   }
+
   // write js builds
   if (!file_exists($appJsBuildsDir)) {
     mkdir($appJsBuildsDir);
   }
+
   $fileName = "app-all-concat.js";
   echo "Write {$fileName} to {$appJsBuildsDir}.\n";
   $out = buildAppJsConcat($out, $webDir);
@@ -74,12 +77,21 @@ if ($params['apply']) {
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
+
   $fileName = "app-all-debug.js";
   echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsDebug($appJsConcat);
+  $out = buildAppJsDebugRegex($appJsConcat);
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
   }
+
+  $fileName = "app-all-debug-min.js";
+  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+  $out = buildAppJsDebugUglifyJS($appJsConcat);
+  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+  }
+
   $fileName = "app-all.js";
   echo "Uglify {$fileName} to {$appJsBuildsDir}.\n";
   $out = buildAppJsMinified($appJsConcat);
@@ -527,7 +539,7 @@ function buildAppJsConcat($jsFileList, $webRoot) {
 * TODO: refine methods. Currently marker (//, /* * /)
 * inside of text strings result in corrupt script.
 */
-function buildAppJsDebug($jsConcat) {
+function buildAppJsDebugRegex($jsConcat) {
 
   $out = $jsConcat;
 
@@ -560,29 +572,65 @@ function buildAppJsDebug($jsConcat) {
 
   $out = "{$license}{$out}";
   return $out;
-}  // eo build app js concat
+}  // eo build app js debug
 
+
+/*
+* Build app js debug from js concat file
+* Remove comments with uglifyjs
+*/
+function buildAppJsDebugUglifyJS($jsConcat) {
+
+  $out = $jsConcat;
+  //$out = buildAppJsDebug($jsConcat);
+
+  $cmd = "/usr/bin/uglifyjs";
+  if (file_exists($cmd)) {
+
+    $f1nam = tempnam("/tmp", "uglify");
+    file_put_contents($f1nam, $out);
+
+    $f2nam = tempnam("/tmp", "uglify");
+    $cmd .= " {$f1nam} -o {$f2nam} --comments '/#LICENSE/' -b indent-level=2 ";
+    echo "{$cmd}\n";
+    passthru($cmd);
+    $out = file_get_contents($f2nam);
+    unlink($f2nam);
+
+    unlink($f1nam);
+  }
+  else {  // no uglifyjs
+    echo "No real js de-commenter found - remove comments by regex.\n";
+    $out = buildAppJsDebugRegex($out);
+  }
+
+  return $out;
+}  // eo build app js debug
 
 
 
 /*
-* Build minified app js from debug version
+* Build minified app js
 */
 function buildAppJsMinified($jsConcat) {
 
-  $out = buildAppJsDebug($jsConcat);
+  $out = $jsConcat;
+  //$out = buildAppJsDebugRegex($jsConcat);
 
   $cmd = "/usr/bin/uglifyjs";
   if (file_exists($cmd)) {
+
     $f1nam = tempnam("/tmp", "uglify");
     file_put_contents($f1nam, $out);
+
     $f2nam = tempnam("/tmp", "uglify");
-    $cmd .= " {$f1nam} -o {$f2nam} -c -m";
+    $cmd .= " {$f1nam} -o {$f2nam} --comments '/#LICENSE/' -c warnings=false -m";
     echo "{$cmd}\n";
     passthru($cmd);
     $out = file_get_contents($f2nam);
-    unlink($f1nam);
     unlink($f2nam);
+
+    unlink($f1nam);
   }
   else {  // no uglifyjs
     echo "No real js minifier found - remove empty lines only.\n";
