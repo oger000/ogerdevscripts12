@@ -5,6 +5,7 @@ $projectName = "ogerarch";
 
 // all directories relative to script location
 
+$devScriptsRoot = __DIR__;
 $projectRoot = __DIR__ . "/..";
 $webDir = "{$projectRoot}/web";
 
