@@ -72,8 +72,8 @@ if ($params['apply']) {
 
   $fileName = "app-all-concat.js";
   echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-//  $out = buildAppJsConcat($out, $webDir);
-  $out = file_get_contents("{$appJsBuildsDir}/{$fileName}");
+  $out = buildAppJsConcat($out, $webDir);
+  //$out = file_get_contents("{$appJsBuildsDir}/{$fileName}");
   $appJsConcat = $out;
   if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
     echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
