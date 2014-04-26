@@ -36,7 +36,8 @@ driver.get('http://localhost/gerhard/src/ogerfibs/repo/web/');
 
 //driver.executeScript("alert('bla');");  // this works
 
-// this does not work
+// this does work, but the result is not as expected:
+// the view is destroyed and does not load main.php
 driver.executeScript(
   "var btn = Ext.ComponentQuery.query('logonWindow #logonButton')[0];" +
   "btn.fireEvent('click', btn);"
