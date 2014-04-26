@@ -65,51 +65,58 @@ if ($params['apply']) {
     echo "ERROR on write to {$appJsList}.\n";
   }
 
-  // write js builds
-  if (!file_exists($appJsBuildsDir)) {
-    mkdir($appJsBuildsDir);
-  }
+  // create js builds
+  if ($params['build']) {
 
-  $fileName = "app-all-concat.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsConcat($out, $webDir);
-  //$out = file_get_contents("{$appJsBuildsDir}/{$fileName}");
-  $appJsConcat = $out;
-  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
-    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
-  }
+    // write js builds
+    if (!file_exists($appJsBuildsDir)) {
+      mkdir($appJsBuildsDir);
+    }
 
-  /*
-  $fileName = "app-all-debug-regex.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsDebugRegex($appJsConcat);
-  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
-    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
-  }
-  */
+    $fileName = "app-all-concat.js";
+    echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+    $out = buildAppJsConcat($out, $webDir);
+    //$out = file_get_contents("{$appJsBuildsDir}/{$fileName}");
+    $appJsConcat = $out;
+    if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+      echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    }
 
-  //$fileName = "app-all-debug-uglifyfs.js";
-  $fileName = "app-all-debug.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsDebugUglifyJS($appJsConcat);
-  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
-    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
-  }
+    /*
+    $fileName = "app-all-debug-regex.js";
+    echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+    $out = buildAppJsDebugRegex($appJsConcat);
+    if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+      echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    }
+    */
 
-  /*
-  $fileName = "app-all-debug-yuicompress.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsDebugYuiCompressor($appJsConcat);
-  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
-    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
-  }
-  */
+    //$fileName = "app-all-debug-uglifyfs.js";
+    $fileName = "app-all-debug.js";
+    echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+    $out = buildAppJsDebugUglifyJS($appJsConcat);
+    if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+      echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    }
 
-  $fileName = "app-all.js";
-  echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-  $out = buildAppJsMinifiedUglyFS($appJsConcat);
-  if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
-    echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    /*
+    $fileName = "app-all-debug-yuicompress.js";
+    echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+    $out = buildAppJsDebugYuiCompressor($appJsConcat);
+    if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+      echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    }
+    */
+
+    $fileName = "app-all.js";
+    echo "Write {$fileName} to {$appJsBuildsDir}.\n";
+    $out = buildAppJsMinifiedUglyFS($appJsConcat);
+    if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
+      echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
+    }
+  }
+  else {
+    echo "INFO: No js builds requested.\n";
   }
 }
 else {
