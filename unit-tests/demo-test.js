@@ -31,4 +31,22 @@ driver.wait(function() {
 
 */
 
-driver.quit();
+
+driver.get('http://localhost/gerhard/src/ogerfibs/repo/web/');
+
+//driver.executeScript("alert('bla');");  // this works
+
+// this does not work
+driver.executeScript(
+  "var btn = Ext.ComponentQuery.query('logonWindow #logonButton')[0];" +
+  "btn.fireEvent('click', btn);"
+);
+
+
+
+
+//driver.get('http://localhost/gerhard/src/ogerfibs/repo/web/main.php?_LOGONID=_1');
+
+
+
+//driver.quit();
