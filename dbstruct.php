@@ -170,6 +170,10 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
       if ($column['DATA_TYPE'] == "date") {
         $fieldList .= "{ name: '{$colName}', type: 'date' },\n    ";
       }
+      /*
+       * add only date type - otherwise numbertype (e.g. for combo field keys)
+       * conflicts with string-types (all numbers from db are string type!)
+       * because combobox entries are searched by === comparision
       elseif ($column['DATA_TYPE'] == "decimal") {
         $fieldList .= "{ name: '{$colName}', type: 'float' },\n    ";
       }
@@ -177,6 +181,7 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
               $column['DATA_TYPE'] == "tinyint") {
         $fieldList .= "{ name: '{$colName}', type: 'int' },\n    ";
       }
+      */
       else {
         $fieldList .= "'{$colName}',\n    ";
       }
