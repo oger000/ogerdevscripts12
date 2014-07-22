@@ -108,12 +108,13 @@ if ($structer->changeCount) {
       echo "Write structure file.\n";
       file_put_contents($dbStructFileName, "<?PHP\n return\n" . $structer->formatDbStruct($dbStruct) . "\n;\n?>\n");
 
-      echo "Dump database structure ($cmd).\n";
-      $pass = Config::$dbDefs[$dbDefAliasId]['pass'];
-      $pass = ($pass ? "-p$pass" : "");
-      $cmd = "mysqldump -u {$dbDef['user']} $pass {$dbDef['dbName']} --no-data " .
-             " | sed 's/ AUTO_INCREMENT=[0-9]*\b//' " .
+      $cmd = "mysqldump -u {$dbDef['user']} \$pass {$dbDef['dbName']} --no-data " .
+             " | sed -e 's/ AUTO_INCREMENT=[0-9]*\b//' " .
              " > $dbStructDumpName";
+      echo "Dump database structure ($cmd).\n";
+      $pass = Config::$dbDefs[$dbDefAliasId]['dbPass'];
+      $pass = ($pass ? "-p$pass" : "");
+      $cmd = str_replace("\$pass", $pass, $cmd);
       passthru($cmd);
     }
   }
