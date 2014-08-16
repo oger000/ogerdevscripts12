@@ -52,7 +52,7 @@ $classes = sortDeps($classes, $appJsName, $appJsMain);
 
 $out = "";
 foreach ($classesNew as $className => $dummy) {
-  $out .= $appJsRel . classes[$className]['fileName'] . ".js\n";
+  $out .= $appJsRel . $classes[$className]['fileName'] . ".js\n";
 }
 
 if (count($classesNew) < count($classes) && $params['partial'] == "add") {
@@ -499,7 +499,7 @@ function sortDeps($classes, $appName, $appJs) {
 /*
 * Analyse app classes
 */
-function analyseAppClasses($classes, $appName, $appJs) {
+function analyseAppClasses($classes) {
 
   global $debug;
   global $aliases;
@@ -672,7 +672,7 @@ function analyseAppClasses($classes, $appName, $appJs) {
   }  // eo resolve alias classes
 
 
-CONTINUE HERE!
+//CONTINUE HERE!
 
 
   // check for missing class dependencies
