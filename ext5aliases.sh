@@ -38,12 +38,10 @@ cat localonly3c | sed -e "/^\$/d" > localonly3d
 cat localonly3d | sed -e "s/'\$/',/" > localonly3e
 
 
-cat localonly3e > $FILE_OUT
+echo "<?PHP\n\n\$extAliases = array(" >> $FILE_OUT
+cat localonly3e | sed -e "s/^/  /" >> $FILE_OUT
+echo "\n);\n\n\n?>\n" >> $FILE_OUT
 
-
-#rm -f localonly1[a-z] localonly2[a-z]
-
-
-
+rm -f localonly[0-9][a-z]
 
 
