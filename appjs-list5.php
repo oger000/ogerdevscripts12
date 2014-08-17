@@ -365,12 +365,15 @@ function analyseAppClasses($classes, $appName) {
 
 
     // collect view controller dependencies
+    /*
+     * we need view contoller only at runtime, but not at loadtime - so comment out
     if (preg_match_all("|controller\s*:\s*['\"](\w+)['\"]|", $content, $matches)) {
       foreach ($matches[1] as $alias) {
         $alias = "controller.{$alias}";
         $aliasDeps[$alias] = $alias;
       }
     }
+    */
 
 
     // remember deps
