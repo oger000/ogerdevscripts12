@@ -30,8 +30,10 @@ cat localonly2g > localonly3a
 
 cat localonly3a | grep "xtype:" >> localonly3b-del
 cat localonly3a | grep "throw new" >> localonly3b-del
+cat localonly3a | grep "function.object" >> localonly3b-del
 cat localonly3a | sed -e "/xtype:/d" > localonly3aa
-cat localonly3aa | sed -e "/throw new/d" > localonly3b
+cat localonly3aa | sed -e "/throw new/d" > localonly3ab
+cat localonly3ab | sed -e "/function.object/d" > localonly3b
 
 cat localonly3b | sort | uniq > localonly3c
 cat localonly3c | sed -e "/^\$/d" > localonly3d

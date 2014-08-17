@@ -69,7 +69,6 @@ $extAliases = array(
   'formaction.load',
   'formaction.standardsubmit',
   'formaction.submit',
-  function(object, methodName) {
   'fx.layout.card.cover',
   'fx.layout.card.cube',
   'fx.layout.card.fade',
