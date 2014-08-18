@@ -2,7 +2,7 @@
 
 
 FILE_IN="ext-all-debug.js"
-FILE_OUT="ext5aliases.localonly"
+FILE_OUT="extaliases.localonly"
 
 rm -f $FILE_OUT
 
