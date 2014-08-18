@@ -323,8 +323,19 @@ function analyseAppClasses($classes, $appName) {
         }
       }
     }
+
     // search for "extend:"
     if (preg_match_all("#extend\s*:\s*(.*?),#s", $content, $matches)) {
+      foreach ($matches[1] as $depMatch) {
+        foreach (explodeDeps($depMatch, $appName) as $depClass) {
+          $deps[$depClass] = $depClass;
+        }
+      }
+    }
+
+    // collect mixin dependencies
+    // depends on [] delimiter, but I am not shure if those are mandatory
+    if (preg_match_all("#mixins\s*:\s*\[(.*?)\]#s", $content, $matches)) {
       foreach ($matches[1] as $depMatch) {
         foreach (explodeDeps($depMatch, $appName) as $depClass) {
           $deps[$depClass] = $depClass;
