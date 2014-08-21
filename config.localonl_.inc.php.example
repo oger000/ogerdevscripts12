@@ -20,7 +20,7 @@ $appJsRel = "js/app";
 $appJsRoot = "{$webDir}/{$appJsRel}";
 $appJsName = "App";
 $appJsMain = "app.js";
-$appJsList = "{$webDir}/appjslist.inc.php";
+$appJsList = "{$webDir}/jslist-app.inc.php";
 $appJsBuildsDir = "{$webDir}/js/builds";
 
 
