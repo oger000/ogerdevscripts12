@@ -33,12 +33,17 @@ foreach ($lines as $line) {
 // process last submodule info
 addSubmodule($submodule);
 
+echo "\nIf content of a submodule is missing, then \"git submodule update --init <path>\"\n";
+echo " will init, clone the content and leave the submodule into detatched state.\n\n";
+
 // process submodule add
 function addSubmodule($submodule) {
 
   if (!$submodule) {
     return;
   }
+
+  echo "\n";
 
   if (!$submodule['path']) {
     echo "Missing path info.";
