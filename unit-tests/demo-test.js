@@ -3,7 +3,7 @@
 var webdriver = require('selenium-webdriver'),
     SeleniumServer = require('selenium-webdriver/remote').SeleniumServer;
 
-var server = new SeleniumServer('tools/selenium-server-standalone.jar', {
+var server = new SeleniumServer('unit-test-tools/selenium-server-standalone.jar', {
   port: 4444
 });
 
@@ -32,7 +32,7 @@ driver.wait(function() {
 */
 
 
-driver.get('http://localhost/gerhard/src/ogerfibs/repo/web/');
+driver.get('http://localhost/gerhard/src/ogerfibs-dev/repo/web/');
 
 //driver.executeScript("alert('bla');");  // this works
 
