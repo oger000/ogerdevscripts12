@@ -4,7 +4,13 @@
 #@reboot sh -c 'Xvfb :99 -ac -screen 0 1024x768x8 > /tmp/xvfb.log 2>&1 &'
 #Xvfb :99 -ac -screen 0 1024x768x8 > /tmp/xvfb.log 2>&1 &
 
-SELENIUM_BROWSER=firefox
-java -jar unit-test-tools/selenium-server-standalone.jar &
+if [ `ps xfa | grep selenium-server-standalone.jar | grep -v grep | wc -l` -eq 0 ] ; then
+  echo "Starting selenium server ..."
+  #SELENIUM_BROWSER=firefox
+  java -jar unit-test-tools/selenium-server-standalone.jar &
+  sleep 5
+fi
 
+
+echo "Starting unit tests ..."
 phpunit unit-tests/demo1
