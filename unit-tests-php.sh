@@ -8,7 +8,7 @@ if [ `ps xfa | grep selenium-server-standalone.jar | grep -v grep | wc -l` -eq 0
   echo "Starting selenium server ..."
   #SELENIUM_BROWSER=firefox
   java -jar unit-test-tools/selenium-server-standalone.jar &
-  sleep 5
+  sleep 30
 fi
 
 
