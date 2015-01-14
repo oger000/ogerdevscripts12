@@ -7,10 +7,12 @@
 if [ `ps xfa | grep selenium-server-standalone.jar | grep -v grep | wc -l` -eq 0 ] ; then
   echo "Starting selenium server ..."
   #SELENIUM_BROWSER=firefox
-  java -jar unit-test-tools/selenium-server-standalone.jar &
-  sleep 5
+echo "SKIP ..."
+#  java -jar tests-tools/selenium-server-standalone.jar &
+#  sleep 5
 fi
 
 
 echo "Starting unit tests ..."
-phpunit unit-tests/demo1
+intern-client config=tests/theintern/integration1/config.js
+
