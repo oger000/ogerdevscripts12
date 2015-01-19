@@ -9,11 +9,23 @@ require_once("global.inc.php");
 require_once("config.localonly.inc.php");
 $params = getParams();
 
+
+// prechecks
+$dbStructDirName = dirname($dbStructFileName);
+if (!file_exists($dbStructDirName)) {
+  mkdir($dbStructDirName);
+}
+if (!file_exists($dbStructFileName)) {
+  file_put_contents($dbStructFileName, "<?PHP\nreturn array(true);\n?>\n");
+}
+
+
 // application init
 echo "Chdir to $webDir\n";
 chdir($webDir);
 echo "\nCWD=" . getcwd() . "\n\n";
 $skipLogonCheck = true;
+$skipSessionStart = true;
 require_once("php/init.inc.php");
 set_exception_handler(null);
 
@@ -112,7 +124,10 @@ if ($structer->changeCount) {
              " | sed -e 's/ AUTO_INCREMENT=[0-9]*\b//' " .
              " > $dbStructDumpName";
       echo "Dump database structure ($cmd).\n";
-      $pass = Config::$dbDefs[$dbDefAliasId]['dbPass'];
+      $pass = Config::$dbDefs[$dbDefAliasId]['pass'];
+      if (!$pass) {
+        echo "INFO: No password found in db config file.\n";
+      }
       $pass = ($pass ? "-p$pass" : "");
       $cmd = str_replace("\$pass", $pass, $cmd);
       passthru($cmd);

@@ -1,7 +1,12 @@
 <?PHP
 
+// This file has to be included into a config.localonly.inc.php file.
+// Most devscripts will not work without a valid config.localonly.inc.php file
+// within this directory.
+
+
 // global settings
-$projectName = "ogerarch";
+$projectName = "dummy";  // override in config.localonly.inc.php
 
 // all directories relative to script location
 
