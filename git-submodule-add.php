@@ -33,8 +33,15 @@ foreach ($lines as $line) {
 // process last submodule info
 addSubmodule($submodule);
 
+$cmd = "git submodule foreach git checkout master";
+echo "$cmd\n";
+passthru($cmd);
+
+
 echo "\nIf content of a submodule is missing, then \"git submodule update --init <path>\"\n";
 echo " will init, clone the content and leave the submodule into detatched state.\n\n";
+
+
 
 // process submodule add
 function addSubmodule($submodule) {
@@ -56,7 +63,10 @@ function addSubmodule($submodule) {
 
   $cmd = "git submodule add {$submodule['url']} {$submodule['path']}";
   echo "$cmd\n";
-  //return;
+  passthru($cmd);
+
+  $cmd = "git submodule update --init {$submodule['path']}";
+  echo "$cmd\n";
   passthru($cmd);
 
 }  // eo add submodule
