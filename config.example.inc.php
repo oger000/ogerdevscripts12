@@ -35,17 +35,17 @@ $distDir = "{$projectRoot}/../dist";
 
 // maybe split into distExcludeFile and distExcludeDir ???
 $distExclude = array(
-  "/.*localonly.*/i",
-  "|devdocu\$|",
-  "|/autobackup/.*sqldump|",
-  "|devdata\$|",
-  "|devscripts\$|",
-  "|devscripts12\$|",
-  "|/lib/extjs4/examples|",
-  "|/lib/extjs4/docs|",
-  "|/lib/extjs4/jsbuilder|",
-  "|/lib/ogerlibphp/obsolete|",
-  "|/lib/ogerlibphp12/docu|",
+	"/.*localonly.*/i",
+	"|devdocu\$|",
+	"|/autobackup/.*sqldump|",
+	"|devdata\$|",
+	"|devscripts\$|",
+	"|devscripts12\$|",
+	"|/lib/extjs4/examples|",
+	"|/lib/extjs4/docs|",
+	"|/lib/extjs4/jsbuilder|",
+	"|/lib/ogerlibphp/obsolete|",
+	"|/lib/ogerlibphp12/docu|",
 );
 
 
@@ -58,8 +58,8 @@ $distVersionFile = "$projectRoot/DISTVERSION";
 $licenseFile = "$projectRoot/LICENSE";
 
 $licenseExclude = array(
-  "|/lib/extjs4|",
-  "|/lib/tcpdf|",
+	"|/lib/extjs4|",
+	"|/lib/tcpdf|",
 );
 
 
