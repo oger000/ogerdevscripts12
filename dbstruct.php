@@ -184,22 +184,22 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
 			}
 			// add type to fire the appropriate reader
 			if ($column['DATA_TYPE'] == "date") {
-				$fieldList .= "{ name: '{$colName}', type: 'date' },\n    ";
+				$fieldList .= "{ name: '{$colName}', type: 'date' },\n\t\t";
 			}
 			/*
 			 * add only date type - otherwise numbertype (e.g. for combo field keys)
 			 * conflicts with string-types (all numbers from db are string type!)
 			 * because combobox entries are searched by === comparision
 			elseif ($column['DATA_TYPE'] == "decimal") {
-				$fieldList .= "{ name: '{$colName}', type: 'float' },\n    ";
+				$fieldList .= "{ name: '{$colName}', type: 'float' },\n\t\t";
 			}
 			elseif ($column['DATA_TYPE'] == "int" ||
 							$column['DATA_TYPE'] == "tinyint") {
-				$fieldList .= "{ name: '{$colName}', type: 'int' },\n    ";
+				$fieldList .= "{ name: '{$colName}', type: 'int' },\n\t\t";
 			}
 			*/
 			else {
-				$fieldList .= "'{$colName}',\n    ";
+				$fieldList .= "'{$colName}',\n\t\t";
 			}
 		}
 		$fieldList = trim($fieldList);
@@ -208,7 +208,7 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
 		if (preg_match("|$search|s", $content, $matches)) {
 			$matches[1] = trim($matches[1]);
 			$search = preg_quote($matches[0], "|");
-			$replace = "{$matches[1]}\n    {$fieldList}\n  {$matches[3]}";
+			$replace = "{$matches[1]}\n\t\t{$fieldList}\n\t{$matches[3]}";
 			$content = preg_replace("|$search|s", $replace, $content);
 		}
 		else {
