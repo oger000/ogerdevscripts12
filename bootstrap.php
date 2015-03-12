@@ -15,25 +15,44 @@ require_once("config.localonly.inc.php");
 $params = getParams();
 
 
-if ($params['create']) {
-	$filesThis = getBstrpFileNames();
-	file_put_contents("bootstrap.localonly.files", implode("\n", $filesThis));
+if ($params['list']) {
+	$content = implode("\n", getBstrpFileNames()) . "\n";
+	file_put_contents("bootstrap.localonly.files", $content);
+	if ($params['debug']) {
+		echo "\n{$content}\n";
+	}
 	exit;
 }
 
 
+if ($params['copy']) {
+	if (!$params['other']) {
+		echo "\n*** Action 'copy' needs parameter: 'other=<other project root>'.\n\n";
+		exit;
+	}
+	$filesOther = getBstrpFileNames($params['other']);
+	echo "Copy not implemented yet.\n";
+	exit;
+}
+
 if ($params['diff']) {
 	if (!$params['other']) {
-		echo "*** Diff action needs parameter: 'other='.\n";
+		echo "\n*** Action 'diff' needs parameter: 'other=<other project root>'.\n\n";
 		exit;
 	}
 	$filesThis = getBstrpFileNames();
 	$filesOther = getBstrpFileNames($params['other']);
+	echo "Diff not implemented yet.\n";
 	bstrpDiff();
 	exit;
 }
 
-echo "*** Need an action parameter: create or diff.\n";
+echo "\n\n";
+echo "*** Need an action parameter: list, copy or diff.\n";
+echo " list: Lists files used for bootstrap package.\n";
+echo " copy: Copies missing bootstrap files from 'other' project root.\n";
+echo " diff: Creates a unified diff for bootstrap files compared with 'other' project root.\n";
+echo "\n\n";
 exit;
 
 
@@ -44,54 +63,54 @@ exit;
  */
 function getBstrpFileNames($rootDir = "") {
 
-	global $projectRoot, $bstrpConfName, $bstrpConfThis;
+	global $projectRoot, $bstrpConfName;
 
-	if ($rootDir) {
-		$bstrpCf = "{$rootDir}/{$bstrpConfName}";
-	}
-	else {
+	if (!$rootDir) {
 		$rootDir = preg_replace("|/[^/]*/\.\.|", "", $projectRoot);
-		//$rootDir = $projectRoot;
-		$bstrpCf = $bstrpConfThis;
 	}
 
 
-	if (!file_exists($bstrpCf)) {
-		echo "*** Cannot find bootstrap conf file '{$bstrpCf}'.\n";
+	if (!file_exists($bstrpConfName)) {
+		echo "*** Cannot find bootstrap conf file '{$bstrpConfName}'.\n";
 		exit;
 	}
 
 	$files = array();
-	$linesBuffer = file($bstrpCf);
+	$lineStack = file($bstrpConfName);
 
-	while ($linesBuffer) {
+	while ($lineStack) {
 
-		$lines = $linesBuffer;
+		$lines = $lineStack;
 		// linesbuffer is refilled by recursion handling
-		$linesBuffer = array();
+		$lineStack = array();
 
 		foreach ($lines as $line) {
 
-			$glob = false;
-			$recurseStar = false;
-			$recurseGlob = false;
+			$doGlob = false;
+			$doSubStar = false;
+			$doSubGlob = false;
 
 			list($ctrl, $fileName) = preg_split("/\s+/", trim($line), 2);
 
 			$plain = (strpos($ctrl, "=") !== false);
-			$glob = (strpos($ctrl, "~") !== false);
-			$recurseGlob = (strpos($ctrl, "+") !== false);
-			$recurseStar = (strpos($ctrl, "*") !== false);
+			$doGlob = (strpos($ctrl, "~") !== false);
+			$doSubGlob = (strpos($ctrl, "+") !== false);
+			$doSubStar = (strpos($ctrl, "*") !== false);
 
-			$fileName = "{$rootDir}/{$fileName}";
+			if (substr($fileName, 0, 1) != "/") {
+				$fileName = "{$rootDir}/{$fileName}";
+			}
 
 			if ($plain) {
 				$files[$fileName] = $fileName;
 				continue;
 			}
 
-			if ($glob) {
-				$subDirs = array();
+			$subDirs = array();
+			$subGlob = "";
+			if ($doGlob) {
+				$fileParts = explode("/", $fileName);
+				$subGlob = array_pop($fileParts);
 				$tmpFiles = glob($fileName);
 				foreach ($tmpFiles as $tmpFile) {
 					if (strpos($tmpFile, "localonly") !== false) {
@@ -106,12 +125,24 @@ function getBstrpFileNames($rootDir = "") {
 				}
 			}
 
-			// CONTINUE HERE
+			// push subdirectories to line stack
+			if ($doSubStar || $doSubGlob) {
+				foreach ($subDirs as $subDir) {
+					if ($doSubGlob) {
+						$subDir = "~+ {$subDir}/{$subGlob}";
+					}
+					else {
+						$subDir = "~* {$subDir}/*";
+					}
+					$lineStack[] = $subDir;
+				}
+			}
 
 		}  // eo conf line loop
 	}
 
 
+	sort($files);
 	return $files;
 }  // eo get files
 

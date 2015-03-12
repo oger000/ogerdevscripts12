@@ -66,7 +66,7 @@ $licenseExclude = array(
 
 
 // for bootstrap
-$bstrpConfName = "bootstrap.conf";
-$bstrpConfThis = "{$projectRoot}/{$bstrpConfName}";
+$bstrpConfBaseName = "bootstrap.conf";
+$bstrpConfName = "{$projectRoot}/{$bstrpConfBaseName}";
 
 ?>
