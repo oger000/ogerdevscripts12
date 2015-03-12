@@ -5,10 +5,10 @@
 // within this directory.
 
 
-// global settings
+// global settings (needed for for creating dist files)
 $projectName = "dummy";  // override in config.localonly.inc.php
 
-// all directories relative to script location
+// all directories are relative to script location
 
 $devScriptsRoot = __DIR__;
 $projectRoot = __DIR__ . "/..";
@@ -50,18 +50,23 @@ $distExclude = array(
 
 
 // for update-shown-version (relative to projectroot)
-$versionFile = "$webDir/config/version.inc.php";
-$distVersionFile = "$projectRoot/DISTVERSION";
+$versionFile = "{$webDir}/config/version.inc.php";
+$distVersionFile = "{$projectRoot}/DISTVERSION";
 
 
 // for licence
-$licenseFile = "$projectRoot/LICENSE";
+$licenseFile = "{$projectRoot}/LICENSE";
 
 $licenseExclude = array(
+	"|/lib/extjs|",
 	"|/lib/extjs4|",
+	"|/lib/extjs5|",
 	"|/lib/tcpdf|",
 );
 
 
+// for bootstrap
+$bstrpConfName = "bootstrap.conf";
+$bstrpConfThis = "{$projectRoot}/{$bstrpConfName}";
 
 ?>
