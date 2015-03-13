@@ -16,11 +16,7 @@ $params = getParams();
 
 
 if ($params['list']) {
-	$content = implode("\n", getBstrpFileNames()) . "\n";
-	file_put_contents("bootstrap.localonly.files", $content);
-	if ($params['debug']) {
-		echo "\n{$content}\n";
-	}
+	doBstrpList();
 	exit;
 }
 
@@ -36,14 +32,7 @@ if ($params['copy']) {
 }
 
 if ($params['diff']) {
-	if (!$params['other']) {
-		echo "\n*** Action 'diff' needs parameter: 'other=<other project root>'.\n\n";
-		exit;
-	}
-	$filesThis = getBstrpFileNames();
-	$filesOther = getBstrpFileNames($params['other']);
-	echo "Diff not implemented yet.\n";
-	bstrpDiff();
+	doBstrpDiff();
 	exit;
 }
 
@@ -52,9 +41,19 @@ echo "*** Need an action parameter: list, copy or diff.\n";
 echo " list: Lists files used for bootstrap package.\n";
 echo " copy: Copies missing bootstrap files from 'other' project root.\n";
 echo " diff: Creates a unified diff for bootstrap files compared with 'other' project root.\n";
+echo "       --no-exclude: Do not exclude known differen files like dbstruct etc\n";
 echo "\n\n";
 exit;
 
+
+
+
+/*
+ * Normalize path (ultrasimple version)
+ */
+function normalizePath($path) {
+	return preg_replace("|/[^/]*/\.\.|", "", $path);
+}  // eo normalize path
 
 
 
@@ -66,7 +65,7 @@ function getBstrpFileNames($rootDir = "") {
 	global $projectRoot, $bstrpConfName;
 
 	if (!$rootDir) {
-		$rootDir = preg_replace("|/[^/]*/\.\.|", "", $projectRoot);
+		$rootDir = normalizePath($projectRoot);
 	}
 
 
@@ -146,58 +145,145 @@ function getBstrpFileNames($rootDir = "") {
 	return $files;
 }  // eo get files
 
+
+
 /*
+ * Create list of bootstrap files
+ */
+function doBstrpList() {
 
-$baseDir = "/home/gerhard/src";
-$dir1 = "{$baseDir}/ogeramstools/repo";
-$dir2 = "{$baseDir}/ogerfibs/repo";
+	global $params;
 
-$inFile = "./bootstrap.package.localonly";
-$outFile = "{$inFile}.diff";
-
-$excludeRegexes = array(
-  "/jslist.*\.php/",
-  "|/web/config/|",
-  "|/web/dbstruct/|",
-);
-
-
-$cmd = "diff -u ";
+	$content = implode("\n", getBstrpFileNames()) . "\n";
+	file_put_contents("bootstrap.localonly.files", $content);
+	if ($params['debug']) {
+		echo "\n{$content}\n";
+	}
+}  // eo list bootstrap files
 
 
-// allow overwrite of settings
-$confFile = "bootstrap.package.localonly.conf";
-if ($confFile) {
-  include($confFile);
-}
+
+/*
+ * Create diff of bootstrap files between two projects
+ */
+function doBstrpDiff() {
+
+	global $params, $projectRoot;
+
+	$outFile = "bootstrap.localonly.diff";
+
+	$excludeRegexes = array(
+		"|^web/jslist.*\.php|",
+		"|^web/dbstruct/|",
+		"|^web/js/app/view/MainMenu.*\.js|",
+	);
+	$cmd = "diff -u ";
+
+	$params['other'] = trim($params['other']);
+	if (!$params['other']) {
+		echo "\n*** Action 'diff' needs parameter: 'other=<other project root>'.\n\n";
+		exit;
+	}
+	if (!file_exists($params['other'])) {
+		echo "\n*** Directory '{$params['other']}' existiert nicht.\n\n";
+		exit;
+	}
+	if (!is_dir($params['other'])) {
+		echo "\n*** File '{$params['other']}' ist kein Directory.\n\n";
+		exit;
+	}
+
+	if ($params['--no-exclude']) {
+		$excludeRegexes = array();
+	}
 
 
-// create diff
-if ($outFile) {
-  unlink ($outFile);
-}
-$fileNames = explode("\n", file_get_contents($inFile));
-foreach ($fileNames as $fileName) {
+	// get file names
 
-  $fileName = trim($fileName);
-  if (!$fileName) {
-    continue;
-  }
+	$filesThisTmp = getBstrpFileNames();
+	$filesOtherTmp = getBstrpFileNames($params['other']);
 
-  $file1Name = "{$dir1}/{$fileName}";
-  $file2Name = "{$dir2}/{$fileName}";
+	$filesThis = array();
+	foreach ($filesThisTmp as $v) {
+		$k = substr($v, strlen(normalizePath($projectRoot)) + 1 );
+		$filesThis[$k] = $v;
+	}
+	$filesOther = array();
+	foreach ($filesOtherTmp as $v) {
+		$k = substr($v, strlen(normalizePath($params['other'])) + 1 );
+		$filesOther[$k] = $v;
+	}
 
-  foreach ($excludeRegexes as $regex) {
-    if (preg_match($regex, $file1Name)) {
-      echo "Exclude {$fileName}\n";
-      continue 2;
-    }
-  }
+//var_export($filesThis);
+//var_export($filesOther);
+//exit;
 
-  passthru("{$cmd} {$file1Name} {$file2Name} >> {$outFile}");
+	// unlink outfile
+	if (file_exists($outFile)) {
+		unlink ($outFile);
+	}
 
-}
+	// loop over common files
+	$filesBoth = array_intersect_key($filesThis, $filesOther);
+	foreach ($filesBoth as $fileKey => $fileName) {
 
-*/
+		$fileThis = $filesThis[$fileKey];
+		$fileOther = $filesOther[$fileKey];
+
+		// remove filename from file arrays
+		unset($filesThis[$fileKey]);
+		unset($filesOther[$fileKey]);
+
+		foreach ($excludeRegexes as $regex) {
+			if (preg_match($regex, $fileKey)) {
+				echo "Exclude {$fileKey}\n";
+				continue 2;
+			}
+		}
+
+		$err = "";
+		if (!file_exists($fileThis)) {
+			$err .= "*** Datei fehlt: {$fileThis}\n";
+		}
+		if (!file_exists($fileOther)) {
+			$err .= "*** Datei fehlt: {$fileOther}\n";
+		}
+		if ($err) {
+			echo $err;
+			continue;
+		}
+
+//echo "DODIFF: {$cmd} {$fileThis} {$fileOther} >> {$outFile}\n";
+		passthru("{$cmd} {$fileThis} {$fileOther} >> {$outFile}");
+	}  // eo intersect loop
+
+
+	$filesRemain = array_merge(array_values($filesThis), array_values($filesOther));
+	foreach ($filesRemain as $fileName) {
+
+		foreach ($excludeRegexes as $regex) {
+			if (preg_match($regex, $fileName)) {
+				echo "Exclude {$fileName}\n";
+				continue 2;
+			}
+		}
+
+		if (!file_exists($fileName)) {
+			echo "*** Unbearbeitete Datei fehlt: {$fileName}\n";
+			continue;
+		}
+		echo "*** Unbearbeitete Datei: {$fileName}\n";
+	}  // eo remain loop
+
+	touch($outFile);  // if empty till now
+
+	if ($params['debug']) {
+		$content = file_get_contents($outFile);
+		echo "\n{$content}\n";
+	}
+
+}  // eo diff
+
+
 
 
