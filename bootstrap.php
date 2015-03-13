@@ -174,6 +174,7 @@ function doBstrpDiff() {
 
 	$excludeRegexes = array(
 		"|^web/jslist.*\.php|",
+		"|^web/config/|",
 		"|^web/dbstruct/|",
 		"|^web/js/app/view/MainMenu.*\.js|",
 	);
