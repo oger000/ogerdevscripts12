@@ -165,23 +165,18 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 	$classes = array();
 	$subDirs = array();
 
-	$dh = opendir($dirName);
-	if ($dh === false) {
-		echo "   *** Cannot open directory $dirName.\n";
+	if (!file_exists($dirName)) {
+		echo "   *** Directory {$dirName} does not exist.\n";
 		exit;
 	}
 
-	while (($fileName = readdir($dh)) !== false) {
+	$fileNames = glob("{$dirName}/*");
+	foreach($fileNames as $fileName) {
 
-		$searchFileName = "{$dirName}/{$fileName}";
+		$searchFileName = $fileName;
 
 		if (is_dir($searchFileName)) {
-			if (substr($fileName, 0, 1) == '.') {
-				// dont process thisdir, parentdir and other dotdirs
-			}
-			else {
-				$subDirs[] = $searchFileName;
-			}
+			$subDirs[] = $searchFileName;
 			continue;
 		}
 
