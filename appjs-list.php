@@ -358,21 +358,25 @@ function analyseAppClasses($classes, $appName) {
 		*/
 
 		// collect xtype dependencies
+		/* DISABLED: not needed at laod time
 		if (preg_match_all("|xtype\s*:\s*['\"](\w+)['\"]|", $content, $matches)) {
 			foreach ($matches[1] as $alias) {
 				$alias = "widget.{$alias}";
 				$aliasDeps[$alias] = $alias;
 			}
 		}
+		*/
 
 
 		// collect storeId dependencies
+		/* DISABLED: not needed at load time
 		if (preg_match_all("|store\s*:\s*['\"](\w+)['\"]|", $content, $matches)) {
 			foreach ($matches[1] as $alias) {
 				$alias = "storeId:{$alias}";
 				$aliasDeps[$alias] = $alias;
 			}
 		}
+		*/
 
 
 		// collect view controller dependencies
