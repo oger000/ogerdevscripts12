@@ -198,7 +198,7 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 		// check if file contains class name
 		// TODO this is very dumb, should be refined
 		$content = file_get_contents($searchFileName);
-		if (!preg_match('|' . preg_quote($className) . '|', $content)) {
+		if (!preg_match('|\b' . preg_quote($className) . '\b|', $content)) {
 			echo "Warning: Cannot find class '{$className}' in {$searchFileName}.\n";
 			exit;
 		}
