@@ -145,25 +145,25 @@ else {
 if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
 
 	echo "\n\n***************************************************\n";
-	echo "*** Create/update models in $appJsRoot/model:\n";
+	echo "*** Create/update models in {$appJsRoot}/model:\n";
 	$tplFile = "$appJsRoot/model/Model.tpl";
 
 	foreach ($dbStruct['TABLES'] as $table) {
 
 		$tableName = $table['TABLE_META']['TABLE_NAME'];
-		$modelName = "$appJsName.model." . ucfirst($tableName);
-		$modelFile = "$appJsRoot/model/" . ucfirst($tableName) . ".js";
+		$tplOutFile = "$appJsRoot/model/" . ucfirst($tableName) . ".js";
 
-		if (file_exists($modelFile)) {
-			$content = file_get_contents($modelFile);
+		if (file_exists($tplOutFile)) {
+			$content = file_get_contents($tplOutFile);
 			$contentBak = $content;
 		}
 		else {
 			if (!file_exists($tplFile)) {
-				echo "* $modelName - Skip create model (missing template).\n";
+				echo "* {$tableName} - Skip create model (missing template).\n";
 				continue;
 			}
 			$content = file_get_contents($tplFile);
+			$contentBak = "";
 		}
 
 		$excludeCols = array();
@@ -212,24 +212,67 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
 			$content = preg_replace("|$search|s", $replace, $content);
 		}
 		else {
-			echo "* $modelName - No field marker found.\n";
+			echo "* {$tableName} - No field marker found.\n";
 			//$content .= "\n$replace";
 		}
 
-		$content = preg_replace("/###MODEL_NAME###/", $modelName, $content);
+		$content = preg_replace("/###TABLE_NAME###/", $tableName, $content);
+		$content = preg_replace("/###TABLE_NAME_UC1###/", ucfirst($tableName), $content);
 
 		if ($content != $contentBak) {
-			echo "* $modelName - Write file.\n";
-			file_put_contents($modelFile, $content);
+			echo "* {$tableName} - Write model file.\n";
+			file_put_contents($tplOutFile, $content);
 		}
 		else {
-			//echo "*** {$modelFile} unchanged.\n";
+			//echo "*** {$tplOutFile} unchanged.\n";
 		}
 	}
 	echo "*** Update models finished.\n";
 }  // eo model files
 
 echo "\n";
+
+
+if ($params['apply'] && !$params['no-stores'] && !$params['reverse']) {
+
+	echo "\n\n***************************************************\n";
+	echo "*** Create/update stores in {$appJsRoot}/store:\n";
+	$tplFile = "$appJsRoot/store/Store.tpl";
+
+	foreach ($dbStruct['TABLES'] as $table) {
+
+		$tableName = $table['TABLE_META']['TABLE_NAME'];
+		$tplOutFile = "$appJsRoot/store/" . ucfirst($tableName) . ".js";
+
+		if (file_exists($tplOutFile)) {
+			$content = file_get_contents($tplOutFile);
+			$contentBak = $content;
+		}
+		else {
+			if (!file_exists($tplFile)) {
+				echo "* {$tableName} - Skip create store (missing template).\n";
+				continue;
+			}
+			$content = file_get_contents($tplFile);
+			$contentBak = "";
+		}
+
+		$content = preg_replace("/###TABLE_NAME###/", $tableName, $content);
+		$content = preg_replace("/###TABLE_NAME_UC1###/", ucfirst($tableName), $content);
+
+		if ($content != $contentBak) {
+			echo "* {$tableName} - Write store file.\n";
+			file_put_contents($tplOutFile, $content);
+		}
+		else {
+			//echo "*** {$tplOutFile} unchanged.\n";
+		}
+	}
+	echo "*** Update stores finished.\n";
+}  // eo store files
+
+echo "\n";
+
 
 
 // sync pre12 dbstruct
