@@ -15,6 +15,12 @@ require_once("config.localonly.inc.php");
 $params = getParams();
 
 
+// get value for bootstrap other param from config if param is without value
+if (array_key_exists("other", $params) && !is_string($params['other'])) {
+	$params['other'] = $bstrOtherValue;
+}
+
+
 if ($params['list']) {
 	doBstrpList();
 	exit;

@@ -68,5 +68,6 @@ $licenseExclude = array(
 // for bootstrap
 $bstrpConfBaseName = "bootstrap.conf";
 $bstrpConfName = "{$projectRoot}/{$bstrpConfBaseName}";
+$bstrOtherValue = "";  // default value for bootstrap other param - best set in localonly config
 
 ?>
