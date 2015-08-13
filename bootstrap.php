@@ -179,10 +179,16 @@ function doBstrpDiff() {
 	$outFile = "bootstrap.localonly.diff";
 
 	$excludeRegexes = array(
-		"|^web/jslist.*\.php|",
-		"|^web/config/|",
-		"|^web/dbstruct/|",
-		"|^web/js/app/view/MainMenu.*\.js|",
+		"|web/jslist.*\.php|",
+		"|web/config/|",
+		"|web/dbstruct/|",
+		//"|web/js/app/view/MainMenu.*\.js|",
+		"|web/js/app/view/Main.*\.js|",
+		"|web/js/app/model/UserGroup.js|",
+		"|web/js/app/view/system/userGroup/FormWin.js|",
+		"|web/js/app/view/system/userGroup/GridWin.js|",
+		"|web/php/system/classes/User.class.php|",
+		"|web/php/system/initDbValues.php|",
 	);
 	$cmd = "diff -u ";
 
