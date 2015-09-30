@@ -62,6 +62,7 @@ $licenseExclude = array(
 	"|/lib/extjs4|",
 	"|/lib/extjs5|",
 	"|/lib/tcpdf|",
+	"|/lib/ogerlibphp12/external|",
 );
 
 
