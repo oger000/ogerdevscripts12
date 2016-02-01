@@ -104,24 +104,21 @@ if ($params['apply']) {
 		}
 		*/
 
-		//$fileName = "app-all-debug-uglifyfs.js";
 		$fileName = "app-all-debug.js";
 		echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-		$out = buildAppJsDebugUglifyJS($appJsConcat);
+		$out = $appJsConcat;
 		if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
 			echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
 		}
 
-		/*
 		$fileName = "app-all-debug-yuicompress.js";
 		echo "Write {$fileName} to {$appJsBuildsDir}.\n";
-		$out = buildAppJsDebugYuiCompressor($appJsConcat);
+		$out = buildAppJsYuiCompressor($appJsConcat);
 		if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
 			echo "ERROR on write to {$appJsBuildsDir}/{$fileName}.\n";
 		}
-		*/
 
-		$fileName = "app-all.js";
+		$fileName = "app-all-uglify.js";
 		echo "Write {$fileName} to {$appJsBuildsDir}.\n";
 		$out = buildAppJsMinifiedUglyFS($appJsConcat);
 		if (file_put_contents("{$appJsBuildsDir}/{$fileName}", $out) === false) {
@@ -658,10 +655,9 @@ function buildAppJsDebugRegex($jsConcat) {
 * Build app js debug from js concat file
 * Remove comments with uglifyjs
 */
-function buildAppJsDebugUglifyJS($jsConcat) {
+function buildAppJsUglifyJS($jsConcat) {
 
 	$out = $jsConcat;
-	//$out = buildAppJsDebug($jsConcat);
 
 	$cmd = "/usr/bin/uglifyjs";
 	if (file_exists($cmd)) {
@@ -679,9 +675,7 @@ function buildAppJsDebugUglifyJS($jsConcat) {
 		unlink($f1nam);
 	}
 	else {  // no uglifyjs
-		//echo "UglifyFs not found - remove comments by regex.\n";
-		//$out = buildAppJsDebugRegex($out);
-		echo "*** UglifyFs not found - do nothing.\n";
+		echo "*** UglifyFs not found - do not uglify.\n";
 }
 
 	return $out;
@@ -693,16 +687,22 @@ function buildAppJsDebugUglifyJS($jsConcat) {
 * Build app js debug from js concat file
 * Remove comments with yui compressor
 */
-function buildAppJsDebugYuiCompressor($jsConcat) {
+function buildAppJsYuiCompressor($jsConcat) {
 
 	global $devScriptsRoot;
 
 	$out = $jsConcat;
-	//$out = buildAppJsDebug($jsConcat);
 
-	$jar = "{$devScriptsRoot}/tools/yuicompressor.jar";
-	$cmd = "java -jar {$jar}";
-	if (file_exists($jar)) {
+	if (file_exists($cmdPath = exec("which yui-compressor"))) {
+		$cmd = $cmdPath;
+	}
+	else {
+		$jar = "{$devScriptsRoot}/tools/yuicompressor.jar";
+		if (file_exists($jar)) {
+			$cmd = "java -jar {$jar}";
+		}
+	}
+	if ($cmd) {
 
 		$f1nam = tempnam("/tmp", "yuicomp");
 		file_put_contents($f1nam, $out);
@@ -717,10 +717,7 @@ function buildAppJsDebugYuiCompressor($jsConcat) {
 		unlink($f1nam);
 	}
 	else {  // no yuicompressor
-		//$cwd = getcwd();
-		//echo "Yuicompressor not found at {$jar} - remove comments by regex.\n";
-		//$out = buildAppJsDebugRegex($out);
-		echo "*** Yuicompressor not found - do nothing.\n";
+		echo "*** Yuicompressor not found - do not compress.\n";
 	}
 
 	return $out;
@@ -735,7 +732,6 @@ function buildAppJsDebugYuiCompressor($jsConcat) {
 function buildAppJsMinifiedUglyFS($jsConcat) {
 
 	$out = $jsConcat;
-	//$out = buildAppJsDebugRegex($jsConcat);
 
 	$cmd = "/usr/bin/uglifyjs";
 	if (file_exists($cmd)) {
@@ -753,10 +749,7 @@ function buildAppJsMinifiedUglyFS($jsConcat) {
 		unlink($f1nam);
 	}
 	else {  // no uglifyjs
-		//echo "UglifyFs not found - remove empty lines only.\n";
-		// remove empty lines to do anything ;-)
-		//$out = preg_replace("/^\s*$/ms", "", $out);
-		echo "*** UglifyFs not found - do nothing.\n";
+		echo "*** UglifyFs not found - do not minify.\n";
 	}
 
 	return $out;
