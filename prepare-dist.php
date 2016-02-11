@@ -12,7 +12,8 @@ $params = getParams();
 
 // application init and prechecks
 
-$timeStamp = date("YmdHis");
+$formattedTimeStamp = date("Y-m-d H:i:s");
+$timeStamp = str_replace(array("-", " "), "", $formattedTimeStamp);
 
 if (!$projectName) {
 	echo "Project name not set in config file.";
