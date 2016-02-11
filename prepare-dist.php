@@ -12,8 +12,8 @@ $params = getParams();
 
 // application init and prechecks
 
-$formattedTimeStamp = date("Y-m-d H:i:s");
-$timeStamp = str_replace(array("-", " ", ":"), "", $formattedTimeStamp);
+touch("localonly.dist.timestamp");
+$timeStamp = date("YmdHis", filemtime("localonly.dist.timestamp"));
 
 if (!$projectName) {
 	echo "Project name not set in config file.";
@@ -80,7 +80,8 @@ echo "\nTemporary dist dir is $tmpDistDir.\n\n";
 
 
 // write dist file
-$cmd = __DIR__ . "/version-out.php";
+chdir(__DIR__);
+$cmd = "./version-out.php";
 echo "$cmd\n";
 passthru($cmd);
 

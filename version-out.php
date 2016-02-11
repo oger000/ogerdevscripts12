@@ -9,6 +9,7 @@ require_once("global.inc.php");
 require_once("config.localonly.inc.php");
 $params = getParams();
 
+$timeStamp = date("Y-m-d H:i:s", filemtime("localonly.dist.timestamp"));
 
 // application init and prechecks
 
@@ -19,8 +20,7 @@ echo "\nCWD=" . getcwd() . "\n\n";
 
 $cmd = "git log --date=iso | head -5 | grep '^commit\|^Date:'";
 echo "$cmd\n";
-$revisionStr = shell_exec($cmd);
-$revisionStr .= (substr($revisionStr, -1) == "\n" ? "" : "\n") . "Dist: {$formattedTimeStamp}";
+$revisionStr = trim(shell_exec($cmd)) . "\nDist: {$timeStamp}";
 echo "Version is:\n$revisionStr\n";
 
 echo "Write version to $versionFile.\n";

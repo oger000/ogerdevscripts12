@@ -51,7 +51,7 @@ $distExclude = array(
 
 // for update-shown-version (relative to projectroot)
 $versionFile = "{$webDir}/config/version.inc.php";
-$distVersionFile = "{$projectRoot}/DISTVERSION";
+$distVersionFile = "{$webDir}/config/version-dist.inc.php";
 
 
 // for licence
