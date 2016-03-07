@@ -37,6 +37,7 @@ $distDir = "{$projectRoot}/../dist";
 $distExclude = array(
 	"/.*localonly.*/i",
 	"|devdocu\$|",
+	"|promotion\$|",
 	"|/autobackup/.*sqldump|",
 	"|devdata\$|",
 	"|devscripts\$|",
