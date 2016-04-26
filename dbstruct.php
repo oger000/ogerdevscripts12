@@ -276,7 +276,7 @@ echo "\n";
 
 
 // sync pre12 dbstruct
-if (!$params['no-pre12']) {
+if ($params['pre12']) {
 
 	$oldDir = getcwd();
 	$oldDevScriptsDir = __DIR__ . "/../devscripts";
