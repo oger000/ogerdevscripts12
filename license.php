@@ -92,18 +92,18 @@ function setLicenseToDir($dirName) {
 		// rewrite file
 		$oldText = file_get_contents("$fullName");
 		if (strpos($oldText, '#LICENSE BEGIN') === false) {
-			echo "  - Skip file $fullName. No LICENSE marker found.\n";
+			echo "  - Skip NL $fullName. No LICENSE marker found.\n";
 			continue;
 		}
 
-		echo "  + Rewrite $fullName\n";
 		$search = "/#LICENSE BEGIN.*?#LICENSE END/ms";
 		$repl = "#LICENSE BEGIN\n$licenseText#LICENSE END";
 		$newText = preg_replace($search, $repl, $oldText);
 		if ($newText == $oldText) {
-			echo "  - Skip file $fullName - nothing changed.\n";
+			echo "  - Skip NC $fullName - nothing changed.\n";
 			continue;
 		}
+		echo "  + Rewrite $fullName\n";
 
 		$result = file_put_contents($fullName, $newText);
 		if ($result === false) {

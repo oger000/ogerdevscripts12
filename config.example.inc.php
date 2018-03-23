@@ -55,8 +55,8 @@ $versionFile = "{$webDir}/config/version.inc.php";
 $distVersionFile = "{$webDir}/config/version-dist.inc.php";
 
 
-// for licence
-$licenseFile = "{$projectRoot}/LICENSE";
+// for license
+$licenseFile = "{$projectRoot}/LICENSE.tpl";
 
 $licenseExclude = array(
 	"|/lib/extjs|",
