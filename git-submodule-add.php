@@ -38,8 +38,8 @@ echo "$cmd\n";
 passthru($cmd);
 
 
-echo "\nIf content of a submodule is missing, then \"git submodule update --init <path>\"\n";
-echo " will init, clone the content and leave the submodule into detatched state.\n\n";
+//echo "\nIf content of a submodule is missing, then \"git submodule update --init <path>\"\n";
+//echo " will init, clone the content and leave the submodule into detatched state.\n\n";
 
 
 
@@ -61,12 +61,17 @@ function addSubmodule($submodule) {
 		return;
 	}
 
-	$cmd = "git submodule add {$submodule['url']} {$submodule['path']}";
-	echo "$cmd\n";
+	//$cmd = "mkdir -p {$submodule['path']}";
+	//$cmd = "rm -rf {$submodule['path']}";
+	//echo "\nOger call: $cmd\n";
+	//passthru($cmd);
+
+	$cmd = "git submodule add --depth 3 {$submodule['url']} {$submodule['path']}";
+	echo "\nOger call: $cmd\n";
 	passthru($cmd);
 
 	$cmd = "git submodule update --init {$submodule['path']}";
-	echo "$cmd\n";
+	echo "\nOger call: $cmd\n";
 	passthru($cmd);
 
 }  // eo add submodule
