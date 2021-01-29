@@ -21,12 +21,14 @@ if (!file_exists($dbStructFileName)) {
 
 
 // application init
+ob_start();
 echo "Chdir to $webDir\n";
 chdir($webDir);
 echo "\nCWD=" . getcwd() . "\n\n";
 $skipLogonCheck = true;
 $skipSessionStart = true;
 require_once("php/init.inc.php");
+ob_end_flush();
 set_exception_handler(null);
 
 if ($params["dbDefAliasId"]) {
