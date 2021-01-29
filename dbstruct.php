@@ -84,13 +84,12 @@ echo "* Database: " . $dbName . "\n";
 echo "* Struct file: $dbStructFileName\n";
 echo "***************************************************\n";
 
-if ($params['reverse']) {
+if ($params['struct-to-db']) {
 	echo "*** Following must be changed in the database to be in sync with the struct file:\n";
 }
 else {
 	echo "*** Following must be changed in the struct file to be in sync with the database:\n";
-	// ATTENTION: the normal mode for this script is the reverse mode for the struct checker !!!
-	$structer->startReverseMode($strucTpl);
+	$structer->startDbToTplMode($strucTpl);
 }
 
 $structer->forceDbStruct($strucTpl);
@@ -98,7 +97,7 @@ $structer->forceDbStruct($strucTpl);
 if ($structer->changeCount) {
 	echo "\n";
 	if ($params['apply']) {
-		if ($params['reverse']) {  // structfile -> db
+		if ($params['struct-to-db']) {  // structfile -> db
 			if (class_exists("Dbw")) {  // update with log
 				Dbw::$struct = $strucTpl;
 				Dbw::checkStruct();
@@ -114,7 +113,7 @@ if ($structer->changeCount) {
 			}
 		}
 		else {  // db -> structfile
-			// Dbw compat-open should have converted the config from pre12 format
+
 			$dbDef = Dbw::$dbDef;
 
 			echo "Write structure file.\n";
@@ -142,7 +141,7 @@ else {
 }
 
 
-if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
+if ($params['apply'] && !$params['no-models'] && !$params['struct-to-db']) {
 
 	echo "\n\n***************************************************\n";
 	echo "*** Create/update models in {$appJsRoot}/model:\n";
@@ -233,7 +232,7 @@ if ($params['apply'] && !$params['no-models'] && !$params['reverse']) {
 echo "\n";
 
 
-if ($params['apply'] && !$params['no-stores'] && !$params['reverse']) {
+if ($params['apply'] && !$params['no-stores'] && !$params['struct-to-db']) {
 
 	echo "\n\n***************************************************\n";
 	echo "*** Create/update stores in {$appJsRoot}/store:\n";
@@ -272,36 +271,3 @@ if ($params['apply'] && !$params['no-stores'] && !$params['reverse']) {
 }  // eo store files
 
 echo "\n";
-
-
-
-// sync pre12 dbstruct
-if ($params['pre12']) {
-
-	$oldDir = getcwd();
-	$oldDevScriptsDir = __DIR__ . "/../devscripts";
-	$oldDevStructUpd = "update-dbinfo.sh";
-
-	if (file_exists("$oldDevScriptsDir/$oldDevStructUpd")) {
-
-		echo "\n\n";
-		echo "***************************************************\n";
-		echo "* Sync pre12 database struct\n";
-		echo "***************************************************\n";
-
-		echo "Chdir $oldDevScriptsDir\n";
-		chdir($oldDevScriptsDir);
-		$cmd = "$oldDevScriptsDir/$oldDevStructUpd -- --suppress-missing-class --da default";
-		if ($params['apply-pre12'] && !$params['reverse']) {
-			$cmd .= " apply";
-		}
-		passthru($cmd);
-		chdir($oldDir);
-	}
-	else {
-		// be silent - echo "No pre12 dbstruct updater found ($oldDevScriptsDir/$oldDevStructUpd).\n";
-	}
-
-}  // eo pre12
-
-?>
