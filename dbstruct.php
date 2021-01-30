@@ -36,33 +36,14 @@ if ($params["dbDefAliasId"]) {
 };
 
 
+// open database and read structure
 Config::init();
-if (class_exists("Dbw")) {
-	if (Config::$dbDefs[$dbDefAliasId]['dsnConnect']) {
-		Dbw::openDbAliasId($dbDefAliasId);
-	}
-	else {   // fallback to pre12 config
-		Dbw::openDbAliasId($dbDefAliasId, array("compat" => true));
-	}
-
-	$conn = Dbw::$conn;
-	$dbName = Dbw::$dbDef['dbName'];
-}
-else {  // fallback to pre12
-	throw new Exeption("Need Dbw class to process.");
-	$dbDef = Config::$dbDefs[$dbDefAliasId];
-	Db::init($dbDef['dbName'], $dbDef['dbUser'], $dbDef['dbPass'], $dbDef['dbAttributes']);
-	$conn = Db::getConn();
-
-	list($dbDriver, $tmp) = explode(':', $dbDef['dbName'], 2);
-	preg_match("/.*dbname=(.*?);/", $tmp, $matches);
-	$dbName = $matches[1];
-}
-
+Dbw::openDbAliasId($dbDefAliasId);
+$conn = Dbw::$conn;
+$dbName = Dbw::$dbDef['dbName'];
 
 $structer = new OgerDbStructMysql($conn, $dbName);
 $dbStruct = $structer->getDbStruct();
-
 $structer->setParams(array("dry-run" => true,
 														"log-level" => $structer::LOG_NOTICE,
 														"echo-log" => true));
@@ -79,6 +60,23 @@ else {
 	echo "*** Cannot find structure file $dbStructFileName.\n";
 	exit;
 }
+
+/*
+echo "\n***************************************************\n";
+echo "Rewrite colom types from mysql 5.5.49 to 8.0.22\n";
+echo "***************************************************\n";
+
+foreach ($strucTpl['TABLES'] as $tableKey => $tableValues) {
+  foreach ($tableValues['COLUMNS'] as $columnKey => $columnValues) {
+    if ($columnValues['COLUMN_TYPE'] == "int(11)") {
+      $strucTpl['TABLES'][$tableKey]['COLUMNS'][$columnKey]['COLUMN_TYPE'] = "int";
+    }
+    if ($columnValues['COLUMN_TYPE'] == "tinyint(4)") {
+      $strucTpl['TABLES'][$tableKey]['COLUMNS'][$columnKey]['COLUMN_TYPE'] = "tinyint";
+    }
+  }
+}  // eo rewrite column types
+*/
 
 
 echo "\n***************************************************\n";
