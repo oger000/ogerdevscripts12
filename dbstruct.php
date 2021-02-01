@@ -61,23 +61,6 @@ else {
 	exit;
 }
 
-/*
-echo "\n***************************************************\n";
-echo "Rewrite colom types from mysql 5.5.49 to 8.0.22\n";
-echo "***************************************************\n";
-
-foreach ($strucTpl['TABLES'] as $tableKey => $tableValues) {
-  foreach ($tableValues['COLUMNS'] as $columnKey => $columnValues) {
-    if ($columnValues['COLUMN_TYPE'] == "int(11)") {
-      $strucTpl['TABLES'][$tableKey]['COLUMNS'][$columnKey]['COLUMN_TYPE'] = "int";
-    }
-    if ($columnValues['COLUMN_TYPE'] == "tinyint(4)") {
-      $strucTpl['TABLES'][$tableKey]['COLUMNS'][$columnKey]['COLUMN_TYPE'] = "tinyint";
-    }
-  }
-}  // eo rewrite column types
-*/
-
 
 echo "\n***************************************************\n";
 echo "* Database: " . $dbName . "\n";
