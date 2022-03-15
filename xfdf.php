@@ -27,7 +27,7 @@ foreach ($lines as $line) {
     if ($def) {
       $allDefs[$def['fdf']] = $def;
     }
-    $def = array('src' => "?");
+    $def = array('src' => "");
   }
 
   list ($name, $value) = explode(":", $line, 2);
@@ -58,11 +58,11 @@ $outText = var_export($allDefs, true);
 // file_put_contents("x", $outText);exit;
 
 $outText = preg_replace("/^\s+/m", "", $outText);
-$outText = str_replace("\n", "", $outText) . "\n";
+$outText = str_replace("\n", "", $outText);
 $outText = str_replace("),", "),\n  ", $outText);
 $arr = explode("(", $outText, 2);
 $outText = implode("(\n  ", $arr);
 
 $outFileName = $fieldsFileName . ".inc.php";
 echo "write $outFileName\n";
-file_put_contents($outFileName, $outText);
+file_put_contents($outFileName, "<?PHP\nreturn\n" . $outText . ";\n");
