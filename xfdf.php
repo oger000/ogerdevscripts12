@@ -62,7 +62,7 @@ ksort($allDefs);
 
 $outText = "<?PHP\nreturn\narray(\n";
 foreach($allDefs as $key => $def) {
-  $outText .= "  '" . $key . "' => " . str_replace("\n", "", var_export($def, true)) . ",\n";
+  $outText .= "  '" . $key . "' => " . str_replace("\n", "", preg_replace("/^\s+/m", "", var_export($def, true))) . ",\n";
 }
 $outText .= ");\n";
 
