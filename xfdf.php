@@ -25,9 +25,9 @@ foreach ($lines as $line) {
 
   if (substr($line, 0, 3) == "---") {
     if ($def) {
-      $allDefs[$def['fdf']] = $def;
+      $allDefs[$def['fdfField']] = $def;
     }
-    $def = array('src' => "");
+    $def = array('srcField' => "");
   }
 
   list ($name, $value) = explode(":", $line, 2);
@@ -35,34 +35,37 @@ foreach ($lines as $line) {
 
   switch($name) {
   case "FieldName":
-    $def['fdf'] = $value;
+    $def['fdfField'] = $value;
     break;
   case "FieldType":
-    $def['type'] = $value;
+    $def['fdfType'] = $value;
+    if ($value == "Button") {
+      $def['fdfStates'] = array();
+    }
+    break;
+  case "FieldStateOption":
+    $def['fdfStates'][] = $value;
+    break;
+  case "FieldFlags":
+    if ($value != 0) {
+      $def['fdfFlags'] = $value;
+    }
     break;
   }
 
 } // eo def line loop
 if ($def) {
-  $allDefs['fdf'] = $def;
-}
-
-$extPos = strrpos($fieldsFileName, ".");
-if ($extPos === false) {
-  $extPos  = strlen($fieldsFileName);
+  $allDefs[$def['fdfField']] = $def;
 }
 
 ksort($allDefs);
 
-$outText = var_export($allDefs, true);
-// file_put_contents("x", $outText);exit;
-
-$outText = preg_replace("/^\s+/m", "", $outText);
-$outText = str_replace("\n", "", $outText);
-$outText = str_replace("),", "),\n  ", $outText);
-$arr = explode("(", $outText, 2);
-$outText = implode("(\n  ", $arr);
+$outText = "<?PHP\nreturn\narray(\n";
+foreach($allDefs as $key => $def) {
+  $outText .= "  '" . $key . "' => " . str_replace("\n", "", var_export($def, true)) . ",\n";
+}
+$outText .= ");\n";
 
 $outFileName = $fieldsFileName . ".inc.php";
 echo "write $outFileName\n";
-file_put_contents($outFileName, "<?PHP\nreturn\n" . $outText . ";\n");
+file_put_contents($outFileName, $outText);
