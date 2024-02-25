@@ -42,7 +42,7 @@ Dbw::openDbAliasId($dbDefAliasId);
 $conn = Dbw::$conn;
 $dbName = Dbw::$dbDef['dbName'];
 
-$structer = new OgerDbStructMysql($conn, $dbName);
+$structer = new OgerDbStructMysql($conn, $dbName, array("ignoreCollate" => true));
 $dbStruct = $structer->getDbStruct();
 $structer->setParams(array("dry-run" => true,
 														"log-level" => $structer::LOG_NOTICE,
