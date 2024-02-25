@@ -548,7 +548,7 @@ function explodeDeps($str, $app) {
 	$appPrefix = "{$app}.";
 
 	// handle json array []
-	if (substr(str, 0, 1) == "[") {
+	if (substr($str, 0, 1) == "[") {
 		$str = trim(substr(str, 1));
 		$pos = strpos(str, "]");
 		if ($pos !== false) {
