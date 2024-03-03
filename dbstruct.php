@@ -42,7 +42,7 @@ Dbw::openDbAliasId($dbDefAliasId);
 $conn = Dbw::$conn;
 $dbName = Dbw::$dbDef['dbName'];
 
-$structer = new OgerDbStructMysql($conn, $dbName, array("ignoreCollate" => true));
+$structer = new OgerDbStructMysql($conn, $dbName);
 $dbStruct = $structer->getDbStruct();
 $structer->setParams(array("dry-run" => true,
 														"log-level" => $structer::LOG_NOTICE,
@@ -83,7 +83,7 @@ if ($structer->changeCount) {
 		if ($params['struct-to-db']) {  // structfile -> db
 			if (class_exists("Dbw")) {  // update with log
 				Dbw::$struct = $strucTpl;
-				Dbw::checkStruct();
+				Dbw::checkStruct(array("ignoreCollate" => true));
 			}
 			else {  // plain update
 				$structer2 = new OgerDbStructMysql($conn, $dbName);
