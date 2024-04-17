@@ -187,6 +187,11 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 			continue;
 		}
 
+		// exclude localonly-files
+		if (stripos($searchFileName, "localonly") !== false) {
+			continue;
+		}
+
 		// make classname out of directory  name
 		// remove startdir (leading slash remains) and extension
 		$shortFileName = substr($searchFileName, strlen($startDir));
