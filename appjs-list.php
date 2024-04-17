@@ -173,6 +173,9 @@ function getAppClasses($dirName, $regex, $appName, $appMain, $startDir = null) {
 		$searchFileName = $fileName;
 
 		if (is_dir($searchFileName)) {
+			if (stripos($searchFileName, "localonly") !== false) {  // exclude localonly-directories
+				continue;
+			}
 			$subDirs[] = $searchFileName;
 			continue;
 		}
